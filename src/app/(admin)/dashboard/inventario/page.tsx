@@ -37,15 +37,7 @@ export default async function InventarioPage() {
         </Link>
       </div>
 
-      <ProductTable 
-        productos={productos || []} 
-        // En un caso real, onDelete sería una Server Action o llamar a un endpoint de API
-        onDelete={async (id) => {
-          'use server'
-          // lógica de eliminación...
-          // await supabase.from('productos').delete().eq('id', id)
-        }} 
-      />
+      <ProductTable productos={productos || []} />
     </div>
   )
 }
