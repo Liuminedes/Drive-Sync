@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageUpload } from './image-upload'
 
-type ProductFormValues = z.infer<typeof productSchema> & { sede_id?: string, asesor_id?: string }
+type ProductFormValues = z.infer<typeof productSchema>
 
 export function ProductForm({ initialData }: { initialData?: any }) {
   const [images, setImages] = useState<File[]>([])

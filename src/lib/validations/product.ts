@@ -5,6 +5,8 @@ export const productSchema = z.object({
   categoria: z.enum(['VEHICULO_USADO', 'VEHICULO_NUEVO', 'MOTOCICLETA', 'MAQUINARIA', 'OTRO']),
   precio_venta: z.coerce.number().min(1, 'El precio debe ser mayor a 0'),
   estado: z.enum(['DISPONIBLE', 'EN_NEGOCIACION', 'RESERVADO', 'VENDIDO', 'INACTIVO']).default('DISPONIBLE'),
+  sede_id: z.string().optional(),
+  asesor_id: z.string().optional(),
   detalles: z.object({
     marca: z.string().optional(),
     modelo: z.string().optional(),
