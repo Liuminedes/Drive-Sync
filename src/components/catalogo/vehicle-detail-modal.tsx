@@ -29,7 +29,7 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
   const supabase = createClient()
   
   const { register, handleSubmit, formState: { errors }, reset } = useForm<LeadFormValues>({
-    resolver: zodResolver(leadSchema)
+    resolver: zodResolver(leadSchema) as any
   })
 
   if (!product) return null

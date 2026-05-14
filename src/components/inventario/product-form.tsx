@@ -26,7 +26,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
   const router = useRouter()
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       titulo: initialData?.titulo || '',
       categoria: initialData?.categoria || 'VEHICULO_USADO',

@@ -178,7 +178,7 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
             )}
             <div className="space-y-2">
               <Label htmlFor="rol">Rol</Label>
-              <Select value={formData.rol} onValueChange={val => setFormData({...formData, rol: val})}>
+              <Select value={formData.rol} onValueChange={val => setFormData({...formData, rol: val || 'ASESOR'})}>
                 <SelectTrigger className="h-10"><SelectValue placeholder="Selecciona un rol" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ASESOR">Asesor de Ventas</SelectItem>
