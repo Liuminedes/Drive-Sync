@@ -178,7 +178,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Categoría</Label>
-          <Select onValueChange={(val: any) => setValue('categoria', val)} defaultValue={watch('categoria')}>
+          <Select key={`cat-${initialData?.categoria || 'new'}`} onValueChange={(val: any) => setValue('categoria', val)} defaultValue={watch('categoria')}>
             <SelectTrigger className="h-9">
               <SelectValue placeholder="Selecciona" />
             </SelectTrigger>
@@ -194,7 +194,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Estado</Label>
-          <Select onValueChange={(val: any) => setValue('estado', val)} defaultValue={watch('estado')}>
+          <Select key={`est-${initialData?.estado || 'new'}`} onValueChange={(val: any) => setValue('estado', val)} defaultValue={watch('estado')}>
             <SelectTrigger className="h-9">
               <SelectValue placeholder="Estado del producto" />
             </SelectTrigger>
@@ -211,7 +211,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Sede (Ubicación)</Label>
           {sedes.length > 0 ? (
-            <Select onValueChange={(val: any) => setValue('sede_id', val)} value={watch('sede_id') || undefined}>
+            <Select key={`sede-select-${sedes.length}`} onValueChange={(val: any) => setValue('sede_id', val)} defaultValue={watch('sede_id') || undefined}>
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Selecciona Sede" />
               </SelectTrigger>
@@ -229,7 +229,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Asesor Asignado</Label>
           {asesores.length > 0 ? (
-            <Select onValueChange={(val: any) => setValue('asesor_id', val)} value={watch('asesor_id') || undefined}>
+            <Select key={`asesor-select-${asesores.length}`} onValueChange={(val: any) => setValue('asesor_id', val)} defaultValue={watch('asesor_id') || undefined}>
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Selecciona Asesor" />
               </SelectTrigger>
@@ -267,7 +267,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           </div>
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Transmisión</Label>
-            <Select onValueChange={(val: any) => setValue('detalles.transmision', val)} defaultValue={watch('detalles.transmision')}>
+            <Select key={`trans-${initialData?.detalles?.transmision || 'new'}`} onValueChange={(val: any) => setValue('detalles.transmision', val)} defaultValue={watch('detalles.transmision') || undefined}>
               <SelectTrigger className="h-9"><SelectValue placeholder="Selecciona" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Manual">Manual</SelectItem>
@@ -279,7 +279,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           </div>
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Combustible</Label>
-            <Select onValueChange={(val: any) => setValue('detalles.combustible', val)} defaultValue={watch('detalles.combustible')}>
+            <Select key={`comb-${initialData?.detalles?.combustible || 'new'}`} onValueChange={(val: any) => setValue('detalles.combustible', val)} defaultValue={watch('detalles.combustible') || undefined}>
               <SelectTrigger className="h-9"><SelectValue placeholder="Selecciona" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Gasolina">Gasolina</SelectItem>
@@ -295,7 +295,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           </div>
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Tracción</Label>
-            <Select onValueChange={(val: any) => setValue('detalles.traccion', val)} defaultValue={watch('detalles.traccion')}>
+            <Select key={`trac-${initialData?.detalles?.traccion || 'new'}`} onValueChange={(val: any) => setValue('detalles.traccion', val)} defaultValue={watch('detalles.traccion') || undefined}>
               <SelectTrigger className="h-9"><SelectValue placeholder="Selecciona" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="4x2">4x2</SelectItem>

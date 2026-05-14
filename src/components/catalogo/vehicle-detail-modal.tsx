@@ -109,6 +109,11 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
                 {detalles.combustible && <div className="flex items-center gap-2"><Fuel className="w-4 h-4 text-primary shrink-0" /> Combustible: <span className="font-medium text-foreground truncate">{detalles.combustible}</span></div>}
                 {detalles.traccion && <div className="flex items-center gap-2"><Navigation className="w-4 h-4 text-primary shrink-0" /> Tracción: <span className="font-medium text-foreground truncate">{detalles.traccion}</span></div>}
                 {detalles.motor && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Motor: <span className="font-medium text-foreground truncate">{detalles.motor}</span></div>}
+                {detalles.carroceria && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Carrocería: <span className="font-medium text-foreground truncate">{detalles.carroceria}</span></div>}
+                {detalles.color_exterior && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Ext: <span className="font-medium text-foreground truncate">{detalles.color_exterior}</span></div>}
+                {detalles.color_interior && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Int: <span className="font-medium text-foreground truncate">{detalles.color_interior}</span></div>}
+                {detalles.puertas > 0 && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Puertas: <span className="font-medium text-foreground">{detalles.puertas}</span></div>}
+                {detalles.pasajeros > 0 && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Pasajeros: <span className="font-medium text-foreground">{detalles.pasajeros}</span></div>}
               </div>
             </div>
           </div>
