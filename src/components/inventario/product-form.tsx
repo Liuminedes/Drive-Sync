@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageUpload } from './image-upload'
+import { ArrowLeft, ArrowRight, Star, Trash2 } from 'lucide-react'
 
 type ProductFormValues = z.infer<typeof productSchema>
 
@@ -72,6 +73,40 @@ export function ProductForm({ initialData }: { initialData?: any }) {
     } catch (err) {
       toast.error('Error al eliminar la foto')
     }
+  }
+
+  const handleMoveImage = async (index: number, direction: 'left' | 'right') => {
+    const newImages = [...existingImages]
+    const swapIndex = direction === 'left' ? index - 1 : index + 1
+    if (swapIndex < 0 || swapIndex >= newImages.length) return
+
+    // Swap positions
+    ;[newImages[index], newImages[swapIndex]] = [newImages[swapIndex], newImages[index]]
+
+    // Update portada: first image is always portada
+    const updated = newImages.map((img, i) => ({ ...img, es_portada: i === 0, orden: i }))
+    setExistingImages(updated)
+
+    // Persist to DB
+    for (const img of updated) {
+      await supabase
+        .from('producto_fotos')
+        .update({ es_portada: img.es_portada, orden: img.orden })
+        .eq('id', img.id)
+    }
+    toast.success('Orden actualizado')
+  }
+
+  const handleSetPortada = async (id: string) => {
+    const updated = existingImages.map(img => ({ ...img, es_portada: img.id === id }))
+    setExistingImages(updated)
+    for (const img of updated) {
+      await supabase
+        .from('producto_fotos')
+        .update({ es_portada: img.es_portada })
+        .eq('id', img.id)
+    }
+    toast.success('Portada actualizada')
   }
 
   const onSubmit = async (data: ProductFormValues) => {
@@ -135,7 +170,8 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           await supabase.from('producto_fotos').insert({
             producto_id: productId,
             url: publicUrlData.publicUrl,
-            es_portada: existingImages.length === 0 && i === 0
+            es_portada: existingImages.length === 0 && i === 0,
+            orden: existingImages.length + i
           })
         }
       }
@@ -321,14 +357,31 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           
           {existingImages.length > 0 && (
             <div className="mb-6">
-              <Label className="text-xs text-muted-foreground block mb-2">Fotos Actuales (Clic para borrar)</Label>
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {existingImages.map(img => (
-                  <div key={img.id} className="relative group cursor-pointer w-24 h-24 shrink-0" onClick={() => handleDeleteExistingImage(img.id, img.url)}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt="Vehículo" className="w-full h-full object-cover rounded-md border" />
-                    <div className="absolute inset-0 bg-red-500/80 hidden group-hover:flex items-center justify-center rounded-md">
-                      <span className="text-white text-xs font-bold">X</span>
+              <Label className="text-xs text-muted-foreground block mb-2">Fotos Actuales — Usa las flechas para reordenar. ⭐ = Portada</Label>
+              <div className="flex gap-3 overflow-x-auto pb-3">
+                {existingImages.map((img, idx) => (
+                  <div key={img.id} className="relative shrink-0 w-28">
+                    <div className="relative group w-28 h-28">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img.url} alt={`Foto ${idx + 1}`} className={`w-full h-full object-cover rounded-lg border-2 transition-all ${img.es_portada ? 'border-primary ring-2 ring-primary/30' : 'border-border'}`} />
+                      <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">{idx + 1}</div>
+                      {img.es_portada && <div className="absolute top-1 right-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"><Star className="w-2.5 h-2.5" /> Portada</div>}
+                    </div>
+                    <div className="flex items-center justify-center gap-1 mt-1.5">
+                      <button type="button" disabled={idx === 0} onClick={() => handleMoveImage(idx, 'left')} className="p-1 rounded border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                      </button>
+                      {!img.es_portada && (
+                        <button type="button" onClick={() => handleSetPortada(img.id)} title="Hacer portada" className="p-1 rounded border border-border hover:bg-yellow-50 hover:border-yellow-300 transition-colors">
+                          <Star className="w-3.5 h-3.5 text-yellow-500" />
+                        </button>
+                      )}
+                      <button type="button" onClick={() => handleDeleteExistingImage(img.id, img.url)} className="p-1 rounded border border-border hover:bg-red-50 hover:border-red-300 transition-colors">
+                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                      </button>
+                      <button type="button" disabled={idx === existingImages.length - 1} onClick={() => handleMoveImage(idx, 'right')} className="p-1 rounded border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}

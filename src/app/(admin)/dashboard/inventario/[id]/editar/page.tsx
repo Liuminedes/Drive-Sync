@@ -17,6 +17,11 @@ export default async function EditarProductoPage({ params }: { params: Promise<{
     .eq('id', resolvedParams.id)
     .single()
 
+  // Ordenar fotos por el campo 'orden'
+  if (producto?.producto_fotos) {
+    producto.producto_fotos.sort((a: any, b: any) => (a.orden ?? 0) - (b.orden ?? 0))
+  }
+
   if (error || !producto) {
     notFound()
   }
