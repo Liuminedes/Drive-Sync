@@ -21,12 +21,21 @@ interface Lead {
   origen: string
   created_at?: string
   producto_id: string | null
+  atendido_por?: string | null
   productos?: {
     titulo: string
     precio_venta: number
     categoria: string
     producto_fotos?: { url: string; es_portada: boolean }[]
   } | null
+  usuarios?: {
+    nombre_completo: string
+  } | null
+}
+
+interface Asesor {
+  id: string
+  nombre_completo: string
 }
 
 const ESTADO_COLORS: Record<string, string> = {
@@ -45,7 +54,7 @@ const ESTADO_LABELS: Record<string, string> = {
   DESCARTADO: 'Descartado',
 }
 
-export function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) {
+export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], asesores: Asesor[] }) {
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [filterEstado, setFilterEstado] = useState<string>('TODOS')
@@ -62,28 +71,76 @@ export function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) {
     ? leads
     : leads.filter(l => l.estado_lead === filterEstado)
 
+  // Mapeo Lead → Vehículo
+  const LEAD_TO_VEHICULO: Record<string, string | null> = {
+    NUEVO: null,              // sin cambio
+    CONTACTADO: 'EN_NEGOCIACION',
+    EN_SEGUIMIENTO: 'RESERVADO',
+    CONVERTIDO: 'VENDIDO',
+    DESCARTADO: 'DISPONIBLE',
+  }
+
   const handleUpdateEstado = async (leadId: string, nuevoEstado: string) => {
+    if (!nuevoEstado) return
     setUpdatingId(leadId)
     try {
-      const { error } = await supabase
+      // 1. Actualizar estado del lead
+      const { error, status, statusText } = await supabase
         .from('leads')
         .update({ estado_lead: nuevoEstado })
         .eq('id', leadId)
 
-      if (error) throw error
+      if (error) {
+        console.error('Update lead error:', JSON.stringify(error), 'Status:', status, statusText)
+        throw new Error(error.message || `Error ${status}: ${statusText}`)
+      }
+
+      // 2. Sincronizar estado del vehículo
+      const lead = leads.find(l => l.id === leadId)
+      const nuevoEstadoVehiculo = LEAD_TO_VEHICULO[nuevoEstado]
+      if (lead?.producto_id && nuevoEstadoVehiculo) {
+        const { error: prodError } = await supabase
+          .from('productos')
+          .update({ estado: nuevoEstadoVehiculo })
+          .eq('id', lead.producto_id)
+
+        if (prodError) {
+          console.warn('No se pudo sincronizar el vehículo:', prodError.message)
+        } else {
+          toast.success(`Vehículo actualizado a "${nuevoEstadoVehiculo.replace('_', ' ')}"`, { icon: '🚗' })
+        }
+      }
 
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, estado_lead: nuevoEstado } : l))
-      
       if (selectedLead?.id === leadId) {
         setSelectedLead(prev => prev ? { ...prev, estado_lead: nuevoEstado } : null)
       }
-
       toast.success(`Estado actualizado a "${ESTADO_LABELS[nuevoEstado]}"`)
-    } catch (err) {
-      toast.error('Error al actualizar el estado')
-      console.error(err)
+    } catch (err: any) {
+      toast.error('Error: ' + (err.message || 'No se pudo actualizar'))
+      console.error('Full error:', err)
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  const handleAssignAsesor = async (leadId: string, asesorId: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ atendido_por: asesorId || null })
+        .eq('id', leadId)
+
+      if (error) throw new Error(error.message)
+
+      const asesor = asesores.find(a => a.id === asesorId)
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, atendido_por: asesorId || null, usuarios: asesor ? { nombre_completo: asesor.nombre_completo } : null } : l))
+      if (selectedLead?.id === leadId) {
+        setSelectedLead(prev => prev ? { ...prev, atendido_por: asesorId || null, usuarios: asesor ? { nombre_completo: asesor.nombre_completo } : null } : null)
+      }
+      toast.success(asesorId ? `Asignado a ${asesor?.nombre_completo}` : 'Asesor removido')
+    } catch (err: any) {
+      toast.error('Error: ' + (err.message || 'No se pudo asignar'))
     }
   }
 
@@ -170,6 +227,9 @@ export function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) {
                 <TableRow key={lead.id} className="h-[56px] group hover:bg-muted/30 transition-colors">
                   <TableCell className="pl-5">
                     <div className="font-medium tracking-tight">{lead.nombre_cliente}</div>
+                    {lead.usuarios?.nombre_completo && (
+                      <div className="text-xs text-primary/80 mt-0.5 font-medium">👤 {lead.usuarios.nombre_completo}</div>
+                    )}
                     {lead.mensaje && (
                       <div className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px]" title={lead.mensaje}>
                         💬 {lead.mensaje}
@@ -289,25 +349,42 @@ export function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) {
                 </div>
               )}
 
-              {/* Status + Meta */}
+              {/* Status + Asesor + Meta */}
               <div className="flex items-center justify-between bg-white dark:bg-muted/10 rounded-lg border border-border/50 p-4">
-                <div className="space-y-1">
-                  <h4 className="font-semibold tracking-tight text-sm text-muted-foreground uppercase">Estado Actual</h4>
-                  <Select
-                    value={selectedLead.estado_lead}
-                    onValueChange={(val) => handleUpdateEstado(selectedLead.id, val || selectedLead.estado_lead)}
-                  >
-                    <SelectTrigger className="h-8 w-[170px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NUEVO">🔵 Nuevo</SelectItem>
-                      <SelectItem value="CONTACTADO">🟡 Contactado</SelectItem>
-                      <SelectItem value="EN_SEGUIMIENTO">🟣 En Seguimiento</SelectItem>
-                      <SelectItem value="CONVERTIDO">🟢 Convertido</SelectItem>
-                      <SelectItem value="DESCARTADO">⚫ Descartado</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <h4 className="font-semibold tracking-tight text-sm text-muted-foreground uppercase">Estado Actual</h4>
+                    <Select
+                      value={selectedLead.estado_lead}
+                      onValueChange={(val) => handleUpdateEstado(selectedLead.id, val || selectedLead.estado_lead)}
+                    >
+                      <SelectTrigger className="h-8 w-[170px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NUEVO">🔵 Nuevo</SelectItem>
+                        <SelectItem value="CONTACTADO">🟡 Contactado</SelectItem>
+                        <SelectItem value="EN_SEGUIMIENTO">🟣 En Seguimiento</SelectItem>
+                        <SelectItem value="CONVERTIDO">🟢 Convertido</SelectItem>
+                        <SelectItem value="DESCARTADO">⚫ Descartado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold tracking-tight text-sm text-muted-foreground uppercase">Atendido por</h4>
+                    <Select
+                      value={selectedLead.atendido_por || '_none'}
+                      onValueChange={(val) => handleAssignAsesor(selectedLead.id, val === '_none' ? '' : (val || ''))}
+                    >
+                      <SelectTrigger className="h-8 w-[170px]">
+                        <SelectValue placeholder="Sin asignar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Sin asignar</SelectItem>
+                        {asesores.map(a => <SelectItem key={a.id} value={a.id}>{a.nombre_completo}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="text-right space-y-1">
                   <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end"><Calendar className="w-3 h-3" /> {selectedLead.created_at ? formatDate(selectedLead.created_at) : 'Sin fecha'}</p>

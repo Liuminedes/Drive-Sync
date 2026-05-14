@@ -8,7 +8,7 @@ const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 export default async function LeadsPage() {
   const supabase = await createClient()
 
-  // Primero intentamos con join a productos
+  // Cargar leads con relación a productos y usuario asignado
   let leads: any[] = []
   const { data, error } = await supabase
     .from('leads')
@@ -19,12 +19,15 @@ export default async function LeadsPage() {
         precio_venta,
         categoria,
         producto_fotos (url, es_portada)
+      ),
+      usuarios!leads_atendido_por_fkey (
+        nombre_completo
       )
     `)
     .eq('tenant_id', DEMO_TENANT_ID)
 
   if (error) {
-    // Si falla (ej: sin FK), cargamos sin join
+    // Fallback sin joins
     console.warn('Leads join falló, cargando sin relación:', error.message)
     const { data: plainLeads } = await supabase
       .from('leads')
@@ -36,6 +39,12 @@ export default async function LeadsPage() {
     leads = data || []
   }
 
+  // Cargar asesores para el selector de asignación
+  const { data: asesores } = await supabase
+    .from('usuarios')
+    .select('id, nombre_completo')
+    .eq('tenant_id', DEMO_TENANT_ID)
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -45,7 +54,7 @@ export default async function LeadsPage() {
         </div>
       </div>
 
-      <LeadsClient initialLeads={leads} />
+      <LeadsClient initialLeads={leads} asesores={asesores || []} />
     </div>
   )
 }
