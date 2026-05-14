@@ -2,6 +2,8 @@ import { ProductForm } from '@/components/inventario/product-form'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default function NuevoProductoPage() {
   return (
     <div className="space-y-6">
