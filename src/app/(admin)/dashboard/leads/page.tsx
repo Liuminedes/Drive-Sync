@@ -1,4 +1,41 @@
-export default function LeadsPage() {
+import { createClient } from '@/lib/supabase/server'
+import { LeadsClient } from '@/components/leads/leads-client'
+
+export const dynamic = 'force-dynamic'
+
+const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
+
+export default async function LeadsPage() {
+  const supabase = await createClient()
+
+  // Primero intentamos con join a productos
+  let leads: any[] = []
+  const { data, error } = await supabase
+    .from('leads')
+    .select(`
+      *,
+      productos (
+        titulo,
+        precio_venta,
+        categoria,
+        producto_fotos (url, es_portada)
+      )
+    `)
+    .eq('tenant_id', DEMO_TENANT_ID)
+
+  if (error) {
+    // Si falla (ej: sin FK), cargamos sin join
+    console.warn('Leads join falló, cargando sin relación:', error.message)
+    const { data: plainLeads } = await supabase
+      .from('leads')
+      .select('*')
+      .eq('tenant_id', DEMO_TENANT_ID)
+
+    leads = plainLeads || []
+  } else {
+    leads = data || []
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -8,10 +45,7 @@ export default function LeadsPage() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-xl border border-border/60 bg-white dark:bg-background p-8 text-center text-muted-foreground">
-        <p className="text-sm">El módulo de Gestión de Leads está en construcción.</p>
-        <p className="text-xs mt-2">Pronto podrás visualizar una vista estilo Kanban (Nuevos, Contactados, Descartados, Convertidos).</p>
-      </div>
+      <LeadsClient initialLeads={leads} />
     </div>
   )
 }
