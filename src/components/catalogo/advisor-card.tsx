@@ -4,7 +4,7 @@ import { Phone, MessageCircle, Star } from 'lucide-react'
 
 // Reemplaza ADVISOR_PHOTO_URL con la URL real de la foto del asesor
 // cuando tengas la imagen lista. Por ahora usa un placeholder.
-const ADVISOR_PHOTO_URL = '' // <-- Aquí va la URL de la foto
+const ADVISOR_PHOTO_URL = '/foto-ivan.jpeg' // <-- Aquí va la URL de la foto
 
 export function AdvisorCard() {
   return (
