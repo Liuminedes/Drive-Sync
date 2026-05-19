@@ -66,14 +66,16 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="!w-[95vw] !max-w-[1000px] p-0 overflow-hidden bg-[#fafafa] dark:bg-background border-border/40 !h-[90vh] md:!h-auto max-h-[95vh] rounded-xl flex flex-col">
+      <DialogContent className="w-[95vw] max-w-[1000px] p-0 overflow-hidden bg-[#fafafa] dark:bg-background border-border/40 h-[92vh] md:h-auto max-h-[95vh] rounded-xl flex flex-col">
         <DialogTitle className="sr-only">{product.titulo}</DialogTitle>
         <DialogDescription className="sr-only">Detalles técnicos e imágenes del vehículo {product.titulo}</DialogDescription>
         
-        <div className="flex flex-col md:flex-row h-full overflow-hidden flex-1">
-          {/* Left Column: Gallery */}
-          <div className="w-full md:w-1/2 bg-muted/20 flex flex-col p-4 md:p-6 border-r border-border/40 overflow-y-auto">
-            <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden mb-4 border border-border/50 shadow-sm bg-muted shrink-0">
+        <div className="flex flex-col md:flex-row h-full overflow-hidden flex-1 min-h-0">
+          
+          {/* Left Column: Gallery + Specs */}
+          <div className="w-full md:w-1/2 bg-muted/20 flex flex-col p-4 md:p-6 border-b md:border-b-0 md:border-r border-border/40 overflow-y-auto">
+            {/* Main image */}
+            <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden mb-3 border border-border/50 shadow-sm bg-muted shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={mainImage} alt={product.titulo} className="object-cover w-full h-full" />
               {product.destacado && (
@@ -83,10 +85,11 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
               )}
             </div>
             
+            {/* Thumbnails */}
             {fotos.length > 1 && (
-              <div className="grid grid-cols-4 gap-2 shrink-0">
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2 shrink-0 mb-4">
                 {fotos.map((foto: any, index: number) => (
-                  <button 
+                  <button
                     key={foto.id || index}
                     onClick={() => setActiveImage(index)}
                     className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all ${activeImage === index ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-70 hover:opacity-100'}`}
@@ -98,68 +101,72 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
               </div>
             )}
 
-            <div className="mt-8 space-y-4 shrink-0 pb-4">
-              <h3 className="font-semibold tracking-tight text-lg">Especificaciones Técnicas</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 text-sm text-muted-foreground">
-                {detalles.marca && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Marca: <span className="font-medium text-foreground truncate">{detalles.marca}</span></div>}
-                {detalles.modelo && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Modelo: <span className="font-medium text-foreground truncate">{detalles.modelo}</span></div>}
-                {detalles.anio && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Año: <span className="font-medium text-foreground">{detalles.anio}</span></div>}
-                {detalles.kilometraje && <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary shrink-0" /> Km: <span className="font-medium text-foreground">{detalles.kilometraje.toLocaleString()}</span></div>}
-                {detalles.transmision && <div className="flex items-center gap-2"><Settings className="w-4 h-4 text-primary shrink-0" /> Trans: <span className="font-medium text-foreground truncate">{detalles.transmision}</span></div>}
-                {detalles.combustible && <div className="flex items-center gap-2"><Fuel className="w-4 h-4 text-primary shrink-0" /> Combustible: <span className="font-medium text-foreground truncate">{detalles.combustible}</span></div>}
-                {detalles.traccion && <div className="flex items-center gap-2"><Navigation className="w-4 h-4 text-primary shrink-0" /> Tracción: <span className="font-medium text-foreground truncate">{detalles.traccion}</span></div>}
-                {detalles.motor && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Motor: <span className="font-medium text-foreground truncate">{detalles.motor}</span></div>}
-                {detalles.carroceria && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Carrocería: <span className="font-medium text-foreground truncate">{detalles.carroceria}</span></div>}
-                {detalles.color_exterior && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Ext: <span className="font-medium text-foreground truncate">{detalles.color_exterior}</span></div>}
-                {detalles.color_interior && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Int: <span className="font-medium text-foreground truncate">{detalles.color_interior}</span></div>}
-                {detalles.puertas > 0 && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Puertas: <span className="font-medium text-foreground">{detalles.puertas}</span></div>}
-                {detalles.pasajeros > 0 && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Pasajeros: <span className="font-medium text-foreground">{detalles.pasajeros}</span></div>}
+            {/* Specs */}
+            <div className="space-y-3 shrink-0 pb-2">
+              <h3 className="font-semibold tracking-tight text-base sm:text-lg">Especificaciones Técnicas</h3>
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-2 gap-x-4 text-xs sm:text-sm text-muted-foreground">
+                {detalles.marca && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Marca: <span className="font-medium text-foreground truncate">{detalles.marca}</span></div>}
+                {detalles.modelo && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Modelo: <span className="font-medium text-foreground truncate">{detalles.modelo}</span></div>}
+                {detalles.anio && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Año: <span className="font-medium text-foreground">{detalles.anio}</span></div>}
+                {detalles.kilometraje && <div className="flex items-center gap-2"><Activity className="w-3.5 h-3.5 text-primary shrink-0" /> Km: <span className="font-medium text-foreground">{detalles.kilometraje.toLocaleString()}</span></div>}
+                {detalles.transmision && <div className="flex items-center gap-2"><Settings className="w-3.5 h-3.5 text-primary shrink-0" /> Trans: <span className="font-medium text-foreground truncate">{detalles.transmision}</span></div>}
+                {detalles.combustible && <div className="flex items-center gap-2"><Fuel className="w-3.5 h-3.5 text-primary shrink-0" /> Combustible: <span className="font-medium text-foreground truncate">{detalles.combustible}</span></div>}
+                {detalles.traccion && <div className="flex items-center gap-2"><Navigation className="w-3.5 h-3.5 text-primary shrink-0" /> Tracción: <span className="font-medium text-foreground truncate">{detalles.traccion}</span></div>}
+                {detalles.motor && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Motor: <span className="font-medium text-foreground truncate">{detalles.motor}</span></div>}
+                {detalles.carroceria && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Carrocería: <span className="font-medium text-foreground truncate">{detalles.carroceria}</span></div>}
+                {detalles.color_exterior && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Ext: <span className="font-medium text-foreground truncate">{detalles.color_exterior}</span></div>}
+                {detalles.color_interior && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Int: <span className="font-medium text-foreground truncate">{detalles.color_interior}</span></div>}
+                {detalles.puertas > 0 && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Puertas: <span className="font-medium text-foreground">{detalles.puertas}</span></div>}
+                {detalles.pasajeros > 0 && <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-primary shrink-0" /> Pasajeros: <span className="font-medium text-foreground">{detalles.pasajeros}</span></div>}
               </div>
             </div>
           </div>
 
           {/* Right Column: Info & CTA */}
           <div className="w-full md:w-1/2 p-4 md:p-8 flex flex-col overflow-y-auto bg-white dark:bg-background">
-            <div className="mb-6 shrink-0 pt-2 md:pt-0">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 leading-tight">{product.titulo}</h2>
-              <div className="text-3xl md:text-4xl font-extrabold tracking-tighter text-primary">
-                ${Number(product.precio_venta).toLocaleString()} <span className="text-base md:text-lg font-medium text-muted-foreground tracking-normal">{product.moneda}</span>
+            <div className="mb-4 sm:mb-6 shrink-0 pt-1 md:pt-2">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mb-2 leading-tight">{product.titulo}</h2>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tighter text-primary">
+                ${Number(product.precio_venta).toLocaleString()}{' '}
+                <span className="text-sm sm:text-base md:text-lg font-medium text-muted-foreground tracking-normal">
+                  {product.moneda}
+                </span>
               </div>
             </div>
 
-            <div className="bg-muted/30 border border-border/50 rounded-xl p-4 md:p-5 mb-8 shrink-0">
-              <h3 className="font-medium tracking-tight mb-4">¿Te interesa este vehículo?</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="bg-muted/30 border border-border/50 rounded-xl p-4 md:p-5 mb-4 sm:mb-8 shrink-0">
+              <h3 className="font-medium tracking-tight mb-3 sm:mb-4">¿Te interesa este vehículo?</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Déjanos tus datos y un asesor especializado se pondrá en contacto contigo para agendar una cita o darte más detalles.
               </p>
               
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+                <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="nombre_cliente" className="text-xs text-muted-foreground">Nombre completo</Label>
-                  <Input id="nombre_cliente" className="h-10" {...register('nombre_cliente')} placeholder="Ej. Juan Pérez" />
+                  <Input id="nombre_cliente" className="h-9 sm:h-10 text-sm" {...register('nombre_cliente')} placeholder="Ej. Juan Pérez" />
                   {errors.nombre_cliente && <p className="text-xs text-red-500">{errors.nombre_cliente.message}</p>}
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <Label htmlFor="telefono_cliente" className="text-xs text-muted-foreground">Teléfono</Label>
-                    <Input id="telefono_cliente" className="h-10" {...register('telefono_cliente')} placeholder="Ej. 3001234567" />
+                    <Input id="telefono_cliente" className="h-9 sm:h-10 text-sm" {...register('telefono_cliente')} placeholder="Ej. 3001234567" />
                     {errors.telefono_cliente && <p className="text-xs text-red-500">{errors.telefono_cliente.message}</p>}
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <Label htmlFor="email_cliente" className="text-xs text-muted-foreground">Correo electrónico</Label>
-                    <Input id="email_cliente" type="email" className="h-10" {...register('email_cliente')} placeholder="juan@ejemplo.com" />
+                    <Input id="email_cliente" type="email" className="h-9 sm:h-10 text-sm" {...register('email_cliente')} placeholder="juan@ejemplo.com" />
                     {errors.email_cliente && <p className="text-xs text-red-500">{errors.email_cliente.message}</p>}
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="mensaje" className="text-xs text-muted-foreground">Mensaje adicional (Opcional)</Label>
-                  <Textarea id="mensaje" {...register('mensaje')} placeholder="¿Tienes alguna pregunta específica? ¿Deseas agendar un test drive?" className="resize-none" />
+                  <Textarea id="mensaje" {...register('mensaje')} placeholder="¿Tienes alguna pregunta específica? ¿Deseas agendar un test drive?" className="resize-none text-sm" rows={3} />
                 </div>
 
-                <div className="pt-2">
-                  <Button type="submit" disabled={isSubmitting} className="w-full h-11 text-base font-medium shadow-md">
+                <div className="pt-1 sm:pt-2">
+                  <Button type="submit" disabled={isSubmitting} className="w-full h-10 sm:h-11 text-sm sm:text-base font-medium shadow-md">
                     {isSubmitting ? 'Enviando...' : 'Contactar a un Asesor'}
                   </Button>
                 </div>
