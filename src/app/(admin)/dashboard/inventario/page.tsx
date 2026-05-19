@@ -23,16 +23,17 @@ export default async function InventarioPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inventario</h1>
-          <p className="text-sm text-muted-foreground">Gestiona los vehículos y productos de tu catálogo.</p>
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Inventario</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 hidden sm:block">Gestiona los vehículos y productos de tu catálogo.</p>
         </div>
-        <Link href="/dashboard/inventario/nuevo">
-          <Button className="h-9 gap-2">
+        <Link href="/dashboard/inventario/nuevo" className="shrink-0">
+          <Button className="h-9 gap-2 text-sm">
             <Plus className="w-4 h-4" />
-            Nuevo Producto
+            <span className="hidden sm:inline">Nuevo Producto</span>
+            <span className="sm:hidden">Nuevo</span>
           </Button>
         </Link>
       </div>

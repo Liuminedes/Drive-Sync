@@ -18,9 +18,9 @@ export default async function UsuariosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Usuarios y Roles</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Usuarios y Roles</h1>
           <p className="text-sm text-muted-foreground">Gestiona los accesos y roles de tu equipo (Admin, Asesor).</p>
         </div>
       </div>

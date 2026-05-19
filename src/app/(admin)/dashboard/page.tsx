@@ -7,7 +7,6 @@ const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 export default async function DashboardPage() {
   const supabase = await createClient()
   
-  // En paralelo, obtenemos los datos
   const [productosRes, leadsRes] = await Promise.all([
     supabase.from('productos').select('*').eq('tenant_id', DEMO_TENANT_ID),
     supabase.from('leads').select('*').eq('tenant_id', DEMO_TENANT_ID)
@@ -25,13 +24,13 @@ export default async function DashboardPage() {
   const leadsNuevos = leads.filter(l => l.estado_lead === 'NUEVO').length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard General</h1>
-        <p className="text-sm text-muted-foreground">Resumen de tu inventario y prospectos actuales.</p>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Dashboard General</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Resumen de tu inventario y prospectos actuales.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
         <KpiCard 
           title="Total Vehículos (Disponibles)"
           value={`${disponibles} / ${totalVehiculos}`}
@@ -52,7 +51,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <div className="mt-8 rounded-xl border border-border/60 bg-white dark:bg-background p-8 text-center text-muted-foreground">
+      <div className="mt-4 rounded-xl border border-border/60 bg-white dark:bg-background p-6 sm:p-8 text-center text-muted-foreground">
         <p className="text-sm">Gráficos y estadísticas detalladas próximamente.</p>
       </div>
     </div>

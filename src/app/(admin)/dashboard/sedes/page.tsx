@@ -18,9 +18,9 @@ export default async function SedesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Sedes y Ubicaciones</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Sedes y Ubicaciones</h1>
           <p className="text-sm text-muted-foreground">Gestiona los puntos de venta físicos de tu inventario.</p>
         </div>
       </div>

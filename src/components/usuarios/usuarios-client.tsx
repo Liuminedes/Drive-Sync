@@ -32,9 +32,7 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
   const supabase = createClient()
   const router = useRouter()
 
-  useEffect(() => {
-    setUsuarios(initialUsuarios)
-  }, [initialUsuarios])
+  useEffect(() => { setUsuarios(initialUsuarios) }, [initialUsuarios])
 
   const handleOpenModal = (usuario?: Usuario) => {
     if (usuario) {
@@ -52,35 +50,19 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
     setIsSubmitting(true)
     try {
       if (editingUsuario) {
-        const { error } = await supabase.from('usuarios').update({
-          nombre_completo: formData.nombre_completo,
-          rol: formData.rol
-        }).eq('id', editingUsuario.id)
-        
+        const { error } = await supabase.from('usuarios').update({ nombre_completo: formData.nombre_completo, rol: formData.rol }).eq('id', editingUsuario.id)
         if (error) throw error
         toast.success('Usuario actualizado')
       } else {
-        if (!formData.password || formData.password.length < 6) {
-          throw new Error('La contraseña debe tener al menos 6 caracteres')
-        }
-
-        const res = await createUser({
-          tenant_id: tenantId,
-          nombre_completo: formData.nombre_completo,
-          email: formData.email,
-          rol: formData.rol,
-          passwordPlano: formData.password
-        })
-
+        if (!formData.password || formData.password.length < 6) throw new Error('La contraseña debe tener al menos 6 caracteres')
+        const res = await createUser({ tenant_id: tenantId, nombre_completo: formData.nombre_completo, email: formData.email, rol: formData.rol, passwordPlano: formData.password })
         if (!res?.success) throw new Error(res?.error || 'No se pudo crear el usuario')
-
-        toast.success('Usuario creado exitosamente. Ya puede iniciar sesión.')
+        toast.success('Usuario creado exitosamente.')
       }
       setIsModalOpen(false)
       router.refresh()
     } catch (err: any) {
       toast.error('Error: ' + err.message)
-      console.error(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -98,19 +80,24 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
     }
   }
 
+  const rolBadge = (rol: string) => rol === 'ADMIN'
+    ? 'bg-primary/10 text-primary border-primary/20'
+    : 'bg-muted text-muted-foreground'
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
-        <p className="text-sm text-blue-800 dark:text-blue-300">
-          <strong>Aviso:</strong> La creación de usuarios generará el perfil para asignarle vehículos. Asegúrate de que el usuario se registre en el sistema.
+      {/* Aviso */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+        <p className="flex-1 text-sm text-blue-800 dark:text-blue-300">
+          <strong>Aviso:</strong> La creación de usuarios generará el perfil para asignarle vehículos.
         </p>
-        <Button onClick={() => handleOpenModal()} className="h-9 gap-2 shrink-0 ml-4">
-          <Plus className="w-4 h-4" />
-          Nuevo Usuario
+        <Button onClick={() => handleOpenModal()} className="h-9 gap-2 shrink-0 w-full sm:w-auto">
+          <Plus className="w-4 h-4" /> Nuevo Usuario
         </Button>
       </div>
 
-      <div className="border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-hidden">
+      {/* ── DESKTOP TABLE (md+) ── */}
+      <div className="hidden md:block border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-hidden">
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="h-11 hover:bg-transparent">
@@ -122,31 +109,21 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
           </TableHeader>
           <TableBody>
             {usuarios.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                  No hay usuarios registrados.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={4} className="h-24 text-center text-muted-foreground">No hay usuarios registrados.</TableCell></TableRow>
             ) : (
               usuarios.map((usuario) => (
                 <TableRow key={usuario.id} className="h-[52px] group hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium tracking-tight pl-6 flex items-center gap-2">
-                    <User className="w-4 h-4 text-primary/70" />
-                    {usuario.nombre_completo || 'Sin nombre'}
+                  <TableCell className="font-medium tracking-tight pl-6">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-primary/70 shrink-0" />
+                      {usuario.nombre_completo || 'Sin nombre'}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{usuario.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={usuario.rol === 'ADMIN' ? 'bg-primary/10 text-primary border-primary/20' : 'bg-muted text-muted-foreground'}>
-                      {usuario.rol}
-                    </Badge>
-                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{usuario.email}</TableCell>
+                  <TableCell><Badge variant="outline" className={rolBadge(usuario.rol)}>{usuario.rol}</Badge></TableCell>
                   <TableCell className="text-right space-x-1 pr-6">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleOpenModal(usuario)}>
-                      <Edit2 className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 hover:text-red-600 hover:bg-red-50 transition-all" onClick={() => handleDelete(usuario.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleOpenModal(usuario)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 hover:text-red-600 hover:bg-red-50 transition-all" onClick={() => handleDelete(usuario.id)}><Trash2 className="w-4 h-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -155,8 +132,35 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
         </Table>
       </div>
 
+      {/* ── MOBILE CARDS (< md) ── */}
+      <div className="md:hidden space-y-3">
+        {usuarios.length === 0 ? (
+          <div className="text-center py-16 bg-white dark:bg-background rounded-xl border border-border/60 text-sm text-muted-foreground">No hay usuarios registrados.</div>
+        ) : (
+          usuarios.map((usuario) => (
+            <div key={usuario.id} className="bg-white dark:bg-background border border-border/60 rounded-xl p-4 shadow-sm flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm truncate">{usuario.nombre_completo || 'Sin nombre'}</p>
+                  <Badge variant="outline" className={`${rolBadge(usuario.rol)} text-[10px] shrink-0`}>{usuario.rol}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground truncate mt-0.5">{usuario.email}</p>
+              </div>
+              <div className="flex gap-1 shrink-0">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenModal(usuario)}><Edit2 className="w-3.5 h-3.5 text-muted-foreground" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-red-600 hover:bg-red-50" onClick={() => handleDelete(usuario.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-[#fafafa] dark:bg-background border-border/40">
+        <DialogContent className="w-[95vw] max-w-[425px] bg-[#fafafa] dark:bg-background border-border/40">
           <DialogHeader>
             <DialogTitle>{editingUsuario ? 'Editar Usuario' : 'Registrar Nuevo Usuario'}</DialogTitle>
           </DialogHeader>
@@ -186,7 +190,7 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
                 </SelectContent>
               </Select>
             </div>
-            <div className="pt-4 flex justify-end gap-2">
+            <div className="pt-2 flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Guardando...' : 'Guardar Perfil'}</Button>
             </div>
