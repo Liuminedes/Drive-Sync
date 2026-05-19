@@ -209,7 +209,7 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
 
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Calificación</Label>
-              <Select value={String(editing.estrellas || 5)} onValueChange={v => setEditing(p => ({...p, estrellas: parseInt(v)}))}>
+              <Select value={String(editing.estrellas || 5)} onValueChange={v => setEditing(p => ({...p, estrellas: parseInt(v ?? '5')}))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {[5,4,3,2,1].map(n => (
