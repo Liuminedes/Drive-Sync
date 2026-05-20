@@ -87,7 +87,7 @@ function Sel({ label, value, onChange, options, labels, placeholder }: {
   return (
     <div className="space-y-1.5">
       <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>
-      <Select value={value||'_all'} onValueChange={v=>onChange(v==='_all'?'':v)}>
+      <Select value={value||'_all'} onValueChange={v=>onChange((v??'_all')==='_all'?'':v??'')}>
         <SelectTrigger className="h-9 text-xs"><SelectValue placeholder={placeholder}/></SelectTrigger>
         <SelectContent>
           <SelectItem value="_all">{placeholder}</SelectItem>
