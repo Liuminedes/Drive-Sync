@@ -18,8 +18,8 @@ export async function AdvisorCard() {
     : '#'
 
   return (
-    <div className="mb-10 w-full">
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl overflow-hidden shadow-xl border border-white/10">
+    <div className="mb-10 w-full relative z-0">
+      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl overflow-hidden shadow-xl border border-white/10 isolate">
 
         {/* Grid bg */}
         <div className="absolute inset-0 opacity-[0.04]" style={{

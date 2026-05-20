@@ -29,7 +29,7 @@ export default async function CatalogoPage() {
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-background">
       {/* Header */}
-      <header className="bg-background/80 backdrop-blur-md border-b border-border/40 sticky top-0 z-10">
+      <header className="bg-background/80 backdrop-blur-md border-b border-border/40 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between py-3 px-4 sm:py-4 sm:px-6 md:px-8">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
