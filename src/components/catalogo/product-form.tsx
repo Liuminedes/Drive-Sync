@@ -214,9 +214,8 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           <div className="flex gap-2">
             {/* Selector de moneda */}
             <Select
-              key={`moneda-${initialData?.moneda || 'COP'}`}
               onValueChange={(val: any) => setValue('moneda', val)}
-              defaultValue={watch('moneda') || 'COP'}
+              value={watch('moneda') || 'COP'}
             >
               <SelectTrigger className="h-9 w-24 shrink-0 font-semibold">
                 <SelectValue placeholder="COP" />
