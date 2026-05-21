@@ -26,6 +26,7 @@ type LeadFormValues = z.infer<typeof leadSchema>
 export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boolean, onClose: () => void, product: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
+  const [showMobileForm, setShowMobileForm] = useState(false)
   const supabase = createClient()
   
   const { register, handleSubmit, formState: { errors }, reset } = useForm<LeadFormValues>({
@@ -62,8 +63,13 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
     }
   }
 
+  const handleClose = () => {
+    setShowMobileForm(false)
+    onClose()
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent
         /*
           Desktop: dos columnas, altura automática — idéntico al original.
@@ -86,10 +92,19 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
         <div tabIndex={0} className="sr-only md:hidden" aria-hidden="true" />
 
-        <div className="flex flex-col md:flex-row h-full overflow-hidden flex-1 min-h-0">
+        <div className="flex flex-col md:flex-row h-full overflow-hidden flex-1 min-h-0 relative">
 
           {/* ── Left: Gallery + Specs ── */}
-          <div className="w-full md:w-1/2 bg-muted/20 flex flex-col p-4 md:p-6 border-b md:border-b-0 md:border-r border-border/40 overflow-y-auto">
+          <div className={`w-full md:w-1/2 bg-muted/20 flex flex-col p-4 md:p-6 border-b md:border-b-0 md:border-r border-border/40 overflow-y-auto pb-24 md:pb-6 ${showMobileForm ? 'hidden md:flex' : 'flex'}`}>
+            
+            {/* Title & Price (Mobile Only - Moved to top) */}
+            <div className="md:hidden mb-4 shrink-0">
+              <h2 className="text-xl font-bold tracking-tight mb-1 leading-tight">{product.titulo}</h2>
+              <div className="text-2xl font-extrabold tracking-tighter text-primary">
+                ${Number(product.precio_venta).toLocaleString()} <span className="text-sm font-medium text-muted-foreground tracking-normal">{product.moneda}</span>
+              </div>
+            </div>
+
             {/* Main image */}
             <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden mb-4 border border-border/50 shadow-sm bg-muted shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -138,9 +153,15 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
             </div>
           </div>
 
-          {/* ── Right: Info & Form ── idéntico al original en desktop ── */}
-          <div className="w-full md:w-1/2 p-4 md:p-8 flex flex-col overflow-y-auto bg-white dark:bg-background">
-            <div className="mb-6 shrink-0 pt-2 md:pt-0">
+          {/* ── Right: Info & Form ── */}
+          <div className={`w-full md:w-1/2 p-4 md:p-8 flex-col overflow-y-auto bg-white dark:bg-background absolute inset-0 z-10 md:static md:z-auto md:flex ${showMobileForm ? 'flex' : 'hidden'}`}>
+            
+            {/* Boton volver en mobile */}
+            <Button variant="ghost" className="md:hidden self-start mb-2 -ml-2 text-muted-foreground" onClick={() => setShowMobileForm(false)}>
+              ← Volver a detalles
+            </Button>
+
+            <div className="hidden md:block mb-6 shrink-0 pt-2 md:pt-0">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 leading-tight">{product.titulo}</h2>
               <div className="text-3xl md:text-4xl font-extrabold tracking-tighter text-primary">
                 ${Number(product.precio_venta).toLocaleString()} <span className="text-base md:text-lg font-medium text-muted-foreground tracking-normal">{product.moneda}</span>
@@ -197,6 +218,16 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
               </form>
             </div>
           </div>
+
+          {/* Sticky CTA for Mobile */}
+          {!showMobileForm && (
+            <div className="md:hidden absolute bottom-0 left-0 right-0 p-4 bg-white/90 dark:bg-background/90 backdrop-blur-md border-t border-border/50 z-20">
+              <Button className="w-full h-12 text-base font-semibold shadow-lg" onClick={() => setShowMobileForm(true)}>
+                Contactar Asesor
+              </Button>
+            </div>
+          )}
+
         </div>
       </DialogContent>
     </Dialog>
