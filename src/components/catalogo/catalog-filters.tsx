@@ -60,13 +60,11 @@ export function CatalogFilters({ marcas, anos, categorias, moneda, onMonedaChang
       </div>
 
       {open && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 p-4 bg-white dark:bg-background border border-border/60 rounded-xl shadow-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-white dark:bg-background border border-border/60 rounded-xl shadow-sm">
           <Sel label="Marca"      value={filtros.marca}       onChange={v=>onFiltroChange('marca',v)}       options={marcas}     placeholder="Todas"/>
           <Sel label="Categoría"  value={filtros.categoria}   onChange={v=>onFiltroChange('categoria',v)}   options={categorias} placeholder="Todas"/>
           <Sel label="Año"        value={filtros.ano}         onChange={v=>onFiltroChange('ano',v)}         options={anos}       placeholder="Todos"/>
           <Sel label="Transmisión" value={filtros.transmision} onChange={v=>onFiltroChange('transmision',v)} options={['Automática','Manual','CVT','Doble embrague']} placeholder="Todas"/>
-          <Sel label="Precio"     value={filtros.orden}       onChange={v=>onFiltroChange('orden',v)}
-            options={['precio_asc','precio_desc']} labels={['Menor a mayor','Mayor a menor']} placeholder="Sin orden"/>
         </div>
       )}
     </div>
