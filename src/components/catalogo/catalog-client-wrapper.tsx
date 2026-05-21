@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { CatalogFilters } from './catalog-filters'
 import { ProductCard } from './product-card'
+import { VehicleDetailModal } from './vehicle-detail-modal'
 import { LayoutGrid, List, ArrowDownUp } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,20 @@ const ITEMS_PER_PAGE = 12
 export function CatalogClientWrapper({ productos }: Props) {
   const [moneda, setMoneda] = useState<'COP' | 'USD'>('COP')
   const [layoutView, setLayoutView] = useState<'grid' | 'list'>('grid')
+  const [deepLinkedProduct, setDeepLinkedProduct] = useState<any>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const v = params.get('v')
+      if (v) {
+        const found = productos.find(p => p.id === v)
+        if (found) {
+          setDeepLinkedProduct(found)
+        }
+      }
+    }
+  }, [productos])
 
   const formatText = (text: string | undefined | null) => {
     if (!text) return ''
@@ -174,6 +189,22 @@ export function CatalogClientWrapper({ productos }: Props) {
             </div>
           )}
         </>
+      )}
+
+      {deepLinkedProduct && (
+        <VehicleDetailModal 
+          isOpen={true} 
+          onClose={() => {
+            setDeepLinkedProduct(null)
+            // Opcional: Limpiar la URL al cerrar sin recargar
+            if (typeof window !== 'undefined') {
+              const url = new URL(window.location.href)
+              url.searchParams.delete('v')
+              window.history.replaceState({}, '', url.toString())
+            }
+          }} 
+          product={deepLinkedProduct} 
+        />
       )}
     </div>
   )

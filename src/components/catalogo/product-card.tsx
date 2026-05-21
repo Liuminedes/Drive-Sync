@@ -22,15 +22,6 @@ export function ProductCard({ product, precioFormateado, layout = 'grid' }: Prop
   const precio = precioFormateado
     || `$${Number(product.precio_venta).toLocaleString('es-CO')} ${product.moneda || 'COP'}`
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      if (params.get('v') === product.id) {
-        setIsModalOpen(true)
-      }
-    }
-  }, [product.id])
-
   function handleShare(e: React.MouseEvent) {
     e.stopPropagation()
     const url = `${window.location.origin}/catalogo?v=${product.id}`
