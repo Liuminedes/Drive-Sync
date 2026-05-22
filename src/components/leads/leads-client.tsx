@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
@@ -193,8 +194,9 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
                     {lead.productos ? (
                       <div className="flex items-center gap-2">
                         {lead.productos.producto_fotos?.[0]?.url && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={lead.productos.producto_fotos[0].url} alt="" className="w-8 h-8 rounded object-cover border border-border/50" />
+                          <div className="w-8 h-8 relative shrink-0">
+                            <Image src={lead.productos.producto_fotos[0].url} alt="" fill sizes="32px" className="rounded object-cover border border-border/50" />
+                          </div>
                         )}
                         <div>
                           <div className="text-sm font-medium truncate max-w-[180px]">{lead.productos.titulo}</div>
@@ -270,8 +272,9 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
               {lead.productos && (
                 <div className="flex items-center gap-2.5 bg-muted/30 rounded-lg p-2.5">
                   {lead.productos.producto_fotos?.[0]?.url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={lead.productos.producto_fotos[0].url} alt="" className="w-10 h-10 rounded-md object-cover border border-border/50 shrink-0" />
+                    <div className="w-10 h-10 relative shrink-0">
+                      <Image src={lead.productos.producto_fotos[0].url} alt="" fill sizes="40px" className="rounded-md object-cover border border-border/50" />
+                    </div>
                   )}
                   <div className="min-w-0">
                     <p className="text-xs font-medium truncate">{lead.productos.titulo}</p>
@@ -354,8 +357,9 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
                   <h4 className="font-semibold tracking-tight text-sm text-muted-foreground uppercase">Vehículo de Interés</h4>
                   <div className="flex items-center gap-3">
                     {selectedLead.productos.producto_fotos?.[0]?.url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={selectedLead.productos.producto_fotos[0].url} alt="" className="w-16 h-16 rounded-lg object-cover border border-border/50" />
+                      <div className="w-16 h-16 relative shrink-0">
+                        <Image src={selectedLead.productos.producto_fotos[0].url} alt="" fill sizes="64px" className="rounded-lg object-cover border border-border/50" />
+                      </div>
                     )}
                     <div>
                       <p className="font-semibold tracking-tight">{selectedLead.productos.titulo}</p>

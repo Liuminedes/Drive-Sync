@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -113,7 +114,7 @@ export function PerfilClient({ perfil: initial, tenantId }: { perfil: Perfil | n
                   <div className="relative shrink-0">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-cyan-400/40 bg-gray-700 shadow-lg">
                       {fotoPreview
-                        ? <img src={fotoPreview} alt="" className="w-full h-full object-cover" />
+                        ? <Image src={fotoPreview} alt="" fill sizes="64px" className="object-cover" unoptimized={fotoPreview.startsWith('blob:')} />
                         : <div className="w-full h-full flex items-center justify-center text-cyan-400 font-bold text-xl">{(f('nombre')||'A').charAt(0).toUpperCase()}</div>}
                     </div>
                     <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center border-2 border-gray-900">
@@ -126,8 +127,8 @@ export function PerfilClient({ perfil: initial, tenantId }: { perfil: Perfil | n
                     <p className="text-gray-400 text-[10px] truncate">{f('concesionario')||'Concesionario'}</p>
                   </div>
                   {logoPreview && (
-                    <div className="shrink-0 w-12 h-12 rounded-xl border border-white/15 bg-white flex items-center justify-center overflow-hidden">
-                      <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-1" />
+                    <div className="shrink-0 w-12 h-12 rounded-xl border border-white/15 bg-white flex items-center justify-center overflow-hidden relative">
+                      <Image src={logoPreview} alt="Logo" fill sizes="48px" className="object-contain p-1" unoptimized={logoPreview.startsWith('blob:')} />
                     </div>
                   )}
                 </div>
@@ -158,7 +159,9 @@ export function PerfilClient({ perfil: initial, tenantId }: { perfil: Perfil | n
             <p className="text-sm font-semibold flex items-center gap-2"><User className="w-4 h-4 text-muted-foreground"/>Foto de perfil</p>
             {fotoPreview && (
               <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/50">
-                <img src={fotoPreview} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-primary/30 shrink-0"/>
+                <div className="w-14 h-14 relative shrink-0">
+                  <Image src={fotoPreview} alt="" fill sizes="56px" className="rounded-full object-cover border-2 border-primary/30" unoptimized={fotoPreview.startsWith('blob:')} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{fotoFiles[0]?`📎 ${fotoFiles[0].name} (pendiente)`:'Foto actual'}</p>
                   {!fotoFiles[0] && <p className="text-xs text-muted-foreground truncate">{f('foto_url')}</p>}
@@ -178,8 +181,8 @@ export function PerfilClient({ perfil: initial, tenantId }: { perfil: Perfil | n
             <p className="text-sm font-semibold flex items-center gap-2"><Building2 className="w-4 h-4 text-muted-foreground"/>Logo de la empresa / concesionario</p>
             {logoPreview && (
               <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/50">
-                <div className="w-14 h-14 rounded-xl border border-border bg-white flex items-center justify-center overflow-hidden shrink-0">
-                  <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-1"/>
+                <div className="w-14 h-14 relative rounded-xl border border-border bg-white flex items-center justify-center overflow-hidden shrink-0">
+                  <Image src={logoPreview} alt="Logo" fill sizes="56px" className="object-contain p-1" unoptimized={logoPreview.startsWith('blob:')} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{logoFiles[0]?`📎 ${logoFiles[0].name} (pendiente)`:'Logo actual'}</p>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -121,7 +122,7 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
                   <td className="pl-5 py-3">
                     <div className="flex items-center gap-2.5">
                       {r.foto_url
-                        ? <img src={r.foto_url} alt="" className="w-8 h-8 rounded-full object-cover border border-border/50 shrink-0"/>
+                        ? <div className="w-8 h-8 relative shrink-0"><Image src={r.foto_url} alt="" fill sizes="32px" className="rounded-full object-cover border border-border/50" /></div>
                         : <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">{r.nombre_cliente.charAt(0)}</div>}
                       <span className="font-medium text-sm">{r.nombre_cliente}</span>
                     </div>
@@ -158,7 +159,7 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {r.foto_url
-                    ? <img src={r.foto_url} alt="" className="w-8 h-8 rounded-full object-cover border border-border/50 shrink-0"/>
+                    ? <div className="w-8 h-8 relative shrink-0"><Image src={r.foto_url} alt="" fill sizes="32px" className="rounded-full object-cover border border-border/50" /></div>
                     : <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">{r.nombre_cliente.charAt(0)}</div>}
                   <div>
                     <p className="font-semibold text-sm">{r.nombre_cliente}</p>
@@ -217,7 +218,9 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
               <Label className="text-xs text-muted-foreground">Foto del cliente (opcional)</Label>
               {(fotoUrl||fotoFiles[0]) ? (
                 <div className="flex items-center gap-3 p-3 bg-muted/30 border border-border/60 rounded-xl">
-                  <img src={fotoFiles[0]?URL.createObjectURL(fotoFiles[0]):fotoUrl} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary/30"/>
+                  <div className="w-12 h-12 relative shrink-0">
+                    <Image src={fotoFiles[0]?URL.createObjectURL(fotoFiles[0]):fotoUrl} alt="" fill sizes="48px" className="rounded-full object-cover border-2 border-primary/30" unoptimized={!!fotoFiles[0]} />
+                  </div>
                   <p className="flex-1 text-sm font-medium">{fotoFiles[0]?`📎 ${fotoFiles[0].name}`:'Foto actual'}</p>
                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={()=>{setFotoUrl('');setFotoFiles([])}}><X className="w-4 h-4"/></Button>
                 </div>

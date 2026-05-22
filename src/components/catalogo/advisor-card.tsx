@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Phone, MessageCircle, Star, Building2 } from 'lucide-react'
+import Image from 'next/image'
 
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
@@ -36,8 +37,7 @@ export async function AdvisorCard() {
               {/* w-36 h-36 en mobile, w-40 h-40 en sm+ */}
               <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-[3px] border-white/25 shadow-2xl bg-gray-700">
                 {perfil.foto_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={perfil.foto_url} alt={perfil.nombre} className="w-full h-full object-cover" />
+                  <Image src={perfil.foto_url} alt={perfil.nombre} fill priority sizes="(max-width: 640px) 144px, 160px" className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-cyan-400 font-bold text-5xl">
                     {perfil.nombre.charAt(0).toUpperCase()}
@@ -108,13 +108,15 @@ export async function AdvisorCard() {
           {perfil.logo_empresa_url && (
             <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2">
               {/* Caja cuadrada grande, centrada */}
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl border border-white/15 bg-white flex items-center justify-center overflow-hidden shadow-lg p-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={perfil.logo_empresa_url}
-                  alt={perfil.concesionario || 'Logo empresa'}
-                  className="w-full h-full object-contain"
-                />
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl border border-white/15 bg-white flex items-center justify-center overflow-hidden shadow-lg p-3 relative">
+                  <Image
+                    src={perfil.logo_empresa_url}
+                    alt={perfil.concesionario || 'Logo empresa'}
+                    fill
+                    priority
+                    sizes="(max-width: 640px) 112px, 128px"
+                    className="object-contain p-3"
+                  />
               </div>
               {perfil.concesionario && (
                 <p className="text-[10px] text-gray-500 text-center leading-tight max-w-[8rem]">

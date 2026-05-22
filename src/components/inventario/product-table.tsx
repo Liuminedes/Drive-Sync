@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -74,8 +75,9 @@ export function ProductTable({ productos }: ProductTableProps) {
                 return (
                   <tr key={prod.id} className="h-[52px] group hover:bg-muted/30 transition-colors border-b border-border/40 last:border-0">
                     <td className="pl-4">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt={prod.titulo} className="w-10 h-10 object-cover rounded aspect-square border border-border/50" />
+                      <div className="w-10 h-10 relative shrink-0">
+                        <Image src={url} alt={prod.titulo} fill sizes="40px" className="object-cover rounded aspect-square border border-border/50" />
+                      </div>
                     </td>
                     <td className="px-3 font-medium tracking-tight text-sm">
                       {prod.titulo}
@@ -124,8 +126,9 @@ export function ProductTable({ productos }: ProductTableProps) {
             const url = prod.producto_fotos?.[0]?.url || 'https://via.placeholder.com/40'
             return (
               <div key={prod.id} className="bg-white dark:bg-background border border-border/60 rounded-xl p-4 shadow-sm flex gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={prod.titulo} className="w-16 h-16 object-cover rounded-lg border border-border/50 shrink-0" />
+                <div className="w-16 h-16 relative shrink-0">
+                  <Image src={url} alt={prod.titulo} fill sizes="64px" className="object-cover rounded-lg border border-border/50" />
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-sm tracking-tight leading-tight truncate">{prod.titulo}</h3>

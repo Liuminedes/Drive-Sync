@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react'
+import Image from 'next/image'
 import { UploadCloud, X } from 'lucide-react'
 
 export function ImageUpload({ images, setImages }: { images: File[], setImages: React.Dispatch<React.SetStateAction<File[]>> }) {
@@ -67,8 +68,7 @@ export function ImageUpload({ images, setImages }: { images: File[], setImages: 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           {images.map((img, i) => (
             <div key={i} className="relative aspect-video rounded-md overflow-hidden bg-muted border border-border group">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={URL.createObjectURL(img)} alt={`Upload ${i}`} className="object-cover w-full h-full" />
+              <Image src={URL.createObjectURL(img)} alt={`Upload ${i}`} fill sizes="200px" className="object-cover" unoptimized />
               <button 
                 type="button"
                 onClick={() => removeImage(i)}

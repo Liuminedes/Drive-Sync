@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -124,7 +125,7 @@ export function EntregasClient({ entregas: initial, tenantId }: { entregas: Entr
                 <tr key={e.id} className="group border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors">
                   <td className="pl-5 py-3">
                     {e.foto_principal
-                      ? <img src={e.foto_principal} alt="" className="w-12 h-9 object-cover rounded-lg border border-border/50"/>
+                      ? <div className="w-12 h-9 relative shrink-0"><Image src={e.foto_principal} alt="" fill sizes="48px" className="object-cover rounded-lg border border-border/50"/></div>
                       : <div className="w-12 h-9 rounded-lg bg-muted flex items-center justify-center text-[10px] text-muted-foreground/50">Sin foto</div>}
                   </td>
                   <td className="px-3 font-medium text-sm">{e.vehiculo}</td>
@@ -157,7 +158,7 @@ export function EntregasClient({ entregas: initial, tenantId }: { entregas: Entr
           : entregas.map(e=>(
             <div key={e.id} className="bg-white dark:bg-background border border-border/60 rounded-xl p-4 shadow-sm flex gap-3">
               {e.foto_principal
-                ? <img src={e.foto_principal} alt="" className="w-16 h-14 object-cover rounded-lg border border-border/50 shrink-0"/>
+                ? <div className="w-16 h-14 relative shrink-0"><Image src={e.foto_principal} alt="" fill sizes="64px" className="object-cover rounded-lg border border-border/50"/></div>
                 : <div className="w-16 h-14 rounded-lg bg-muted shrink-0"/>}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
@@ -201,7 +202,7 @@ export function EntregasClient({ entregas: initial, tenantId }: { entregas: Entr
                   {existingFotos.map((foto,idx)=>(
                     <div key={idx} className="relative shrink-0 w-28">
                       <div className="relative group w-28 h-28">
-                        <img src={foto.url} alt="" className={`w-full h-full object-cover rounded-lg border-2 ${foto.es_portada?'border-primary ring-2 ring-primary/30':'border-border'}`}/>
+                        <Image src={foto.url} alt="" fill sizes="112px" className={`object-cover rounded-lg border-2 ${foto.es_portada?'border-primary ring-2 ring-primary/30':'border-border'}`}/>
                         <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">{idx+1}</div>
                         {foto.es_portada&&<div className="absolute top-1 right-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"><Star className="w-2.5 h-2.5"/>Portada</div>}
                       </div>

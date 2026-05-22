@@ -1,6 +1,7 @@
 'use client'
 
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -107,8 +108,7 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
 
             {/* Main image */}
             <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden mb-4 border border-border/50 shadow-sm bg-muted shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={mainImage} alt={product.titulo} className="object-cover w-full h-full" />
+              <Image src={mainImage} alt={product.titulo} fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
               {product.destacado && (
                 <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-medium px-2.5 py-0.5 rounded-md border-none shadow-md">
                   Destacado
@@ -125,8 +125,7 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
                     onClick={() => setActiveImage(index)}
                     className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all ${activeImage === index ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-70 hover:opacity-100'}`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={foto.url} alt="thumbnail" className="object-cover w-full h-full" />
+                    <Image src={foto.url} alt="thumbnail" fill className="object-cover" sizes="25vw" />
                   </button>
                 ))}
               </div>

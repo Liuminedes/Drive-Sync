@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema } from '@/lib/validations/product'
@@ -388,8 +389,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
                 {existingImages.map((img, idx) => (
                   <div key={img.id} className="relative shrink-0 w-28">
                     <div className="relative group w-28 h-28">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img.url} alt={`Foto ${idx + 1}`} className={`w-full h-full object-cover rounded-lg border-2 transition-all ${img.es_portada ? 'border-primary ring-2 ring-primary/30' : 'border-border'}`} />
+                      <Image src={img.url} alt={`Foto ${idx + 1}`} fill sizes="112px" className={`object-cover rounded-lg border-2 transition-all ${img.es_portada ? 'border-primary ring-2 ring-primary/30' : 'border-border'}`} />
                       <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">{idx + 1}</div>
                       {img.es_portada && <div className="absolute top-1 right-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"><Star className="w-2.5 h-2.5" /> Portada</div>}
                     </div>

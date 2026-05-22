@@ -1,6 +1,7 @@
 'use client'
 
 import { Star } from 'lucide-react'
+import Image from 'next/image'
 
 interface Resena {
   id: string
@@ -51,8 +52,9 @@ export function ResenasSectionPublic({ resenas }: { resenas: Resena[] }) {
             <div className="flex items-center gap-3 pt-2 border-t border-border/50">
               <div className="w-9 h-9 rounded-full overflow-hidden bg-primary/10 border border-border flex items-center justify-center shrink-0">
                 {r.foto_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={r.foto_url} alt={r.nombre_cliente} className="w-full h-full object-cover" />
+                  <div className="w-full h-full relative">
+                    <Image src={r.foto_url} alt={r.nombre_cliente} fill sizes="36px" className="object-cover" />
+                  </div>
                 ) : (
                   <span className="text-primary font-bold text-sm">
                     {(r.nombre_cliente || '?').charAt(0).toUpperCase()}

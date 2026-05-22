@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 
@@ -50,11 +51,12 @@ export function EntregasSectionPublic({ entregas }: { entregas: Entrega[] }) {
             className="group relative aspect-[4/3] rounded-xl overflow-hidden bg-muted border border-border cursor-pointer hover:shadow-md transition-all duration-200"
           >
             {e.foto_principal ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={e.foto_principal}
                 alt={`Entrega ${e.cliente_nombre}`}
-                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-cover transform group-hover:scale-105 transition-transform duration-500"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
@@ -96,11 +98,12 @@ export function EntregasSectionPublic({ entregas }: { entregas: Entrega[] }) {
                   {/* Imagen principal */}
                   <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden mb-4 border border-border/50 shadow-sm bg-muted shrink-0">
                     {fotos[activeImg] ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={fotos[activeImg]}
                         alt="Entrega"
-                        className="object-cover w-full h-full"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
@@ -126,8 +129,7 @@ export function EntregasSectionPublic({ entregas }: { entregas: Entrega[] }) {
                           onClick={() => setActiveImg(i)}
                           className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all ${activeImg === i ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-70 hover:opacity-100'}`}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={f} alt="" className="object-cover w-full h-full" />
+                          <Image src={f} alt="" fill sizes="25vw" className="object-cover" />
                         </button>
                       ))}
                     </div>

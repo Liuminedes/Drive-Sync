@@ -12,6 +12,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import Image from 'next/image'
 import { UploadCloud, X, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -127,8 +128,7 @@ export function ImageUploader({ folder, maxFiles, onUploaded, hint }: Props) {
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
             {previews.map((p, i) => (
               <div key={i} className="group relative aspect-[4/3] rounded-lg overflow-hidden bg-muted border border-border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.url} alt="" className="w-full h-full object-cover" />
+                <Image src={p.url} alt="" fill sizes="200px" className="object-cover" unoptimized={p.url.startsWith('blob:')} />
                 <button
                   type="button" onClick={() => remove(i)}
                   className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"

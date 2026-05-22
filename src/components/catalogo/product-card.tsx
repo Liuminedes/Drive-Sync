@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { VehicleDetailModal } from './vehicle-detail-modal'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 interface Props {
   product: any
@@ -37,9 +38,8 @@ export function ProductCard({ product, precioFormateado, layout = 'grid' }: Prop
           className={`relative bg-muted overflow-hidden cursor-pointer shrink-0 ${layout === 'list' ? 'w-[40%] sm:w-1/3' : 'aspect-[4/3] w-full'}`}
           onClick={() => setIsModalOpen(true)}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imageUrl} alt={product.titulo}
-            className={`object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500 ${layout === 'list' ? 'absolute inset-0' : ''}`}/>
+          <Image src={imageUrl} alt={product.titulo} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transform group-hover:scale-105 transition-transform duration-500"/>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
 
           {product.destacado && (
