@@ -50,7 +50,7 @@ export function InventoryFilters() {
           className="pl-9 w-full bg-muted/20"
         />
       </div>
-      <Select value={estado} onValueChange={setEstado}>
+      <Select value={estado} onValueChange={(val) => setEstado(val || 'TODOS')}>
         <SelectTrigger className="w-full sm:w-[180px] bg-muted/20">
           <SelectValue placeholder="Estado" />
         </SelectTrigger>
