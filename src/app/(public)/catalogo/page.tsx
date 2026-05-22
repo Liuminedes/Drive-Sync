@@ -78,6 +78,14 @@ export default async function CatalogoPage() {
           </section>
         )}
       </main>
+
+      <footer className="border-t border-border/40 bg-white/50 dark:bg-background/50 backdrop-blur-md py-6 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 text-center">
+          <p className="text-[13px] text-muted-foreground font-medium">
+            Powered by <a href="https://vyntraorbit.com" target="_blank" rel="noopener noreferrer" className="font-bold text-primary hover:underline">Vyntra Orbit</a>
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }

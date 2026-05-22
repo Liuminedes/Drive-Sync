@@ -52,6 +52,10 @@ export function Sidebar() {
           onClick={async () => { const { logout } = await import('@/actions/auth'); await logout(); window.location.href = '/login' }}>
           Cerrar Sesión
         </Button>
+        <div className="mt-4 text-center">
+          <p className="text-[10px] text-muted-foreground font-medium">Powered by</p>
+          <a href="https://vyntraorbit.com" target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold tracking-tight text-primary hover:underline">Vyntra Orbit</a>
+        </div>
       </div>
     </aside>
   )
