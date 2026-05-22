@@ -5,16 +5,18 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Eye, Edit2, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Eye, Edit2, Trash2 } from 'lucide-react'
 import { VehicleDetailModal } from '../catalogo/vehicle-detail-modal'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
 interface ProductTableProps {
   productos: any[]
+  currentPage?: number
+  totalPages?: number
 }
 
-export function ProductTable({ productos }: ProductTableProps) {
+export function ProductTable({ productos, currentPage = 1, totalPages = 1 }: ProductTableProps) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const router = useRouter()
@@ -160,11 +162,40 @@ export function ProductTable({ productos }: ProductTableProps) {
         )}
       </div>
 
-      <VehicleDetailModal 
-        isOpen={!!selectedProduct} 
-        onClose={() => setSelectedProduct(null)} 
-        product={selectedProduct} 
-      />
+        <VehicleDetailModal 
+          isOpen={!!selectedProduct} 
+          onClose={() => setSelectedProduct(null)} 
+          product={selectedProduct} 
+        />
+
+        {/* ─── PAGINATION ─── */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 border-t border-border/40 mt-6">
+            <div className="text-sm text-muted-foreground">
+              Página <span className="font-medium text-foreground">{currentPage}</span> de <span className="font-medium text-foreground">{totalPages}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/dashboard/inventario?page=${currentPage - 1}`)}
+                disabled={currentPage <= 1}
+                className="h-8 px-3"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/dashboard/inventario?page=${currentPage + 1}`)}
+                disabled={currentPage >= totalPages}
+                className="h-8 px-3"
+              >
+                Siguiente <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
     </>
   )
 }
