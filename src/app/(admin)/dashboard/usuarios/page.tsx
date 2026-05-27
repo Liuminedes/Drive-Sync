@@ -18,7 +18,7 @@ export default async function UsuariosPage() {
         </div>
       </div>
 
-      <UsuariosClient initialUsuarios={usuarios || []} tenantId={DEMO_TENANT_ID} />
+      <UsuariosClient initialUsuarios={(usuarios as any) || []} tenantId={DEMO_TENANT_ID} />
     </div>
   )
 }

@@ -73,7 +73,7 @@ export default async function CatalogoPage() {
         {resenas.length > 0 && (
           <section id="resenas" className="border-t border-border/40 bg-white dark:bg-muted/5">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16">
-              <ResenasSectionPublic resenas={resenas} />
+              <ResenasSectionPublic resenas={(resenas as any) || []} />
             </div>
           </section>
         )}
@@ -81,7 +81,7 @@ export default async function CatalogoPage() {
         {entregas.length > 0 && (
           <section id="entregas" className="border-t border-border/40">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16">
-              <EntregasSectionPublic entregas={entregas} />
+              <EntregasSectionPublic entregas={(entregas as any) || []} />
             </div>
           </section>
         )}

@@ -18,7 +18,7 @@ export default async function SedesPage() {
         </div>
       </div>
 
-      <SedesClient initialSedes={sedes || []} tenantId={DEMO_TENANT_ID} />
+      <SedesClient initialSedes={(sedes as any) || []} tenantId={DEMO_TENANT_ID} />
     </div>
   )
 }

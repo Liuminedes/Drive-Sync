@@ -65,7 +65,7 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
 
   useEffect(() => { setLeads(initialLeads) }, [initialLeads])
 
-  const filteredLeads = filterEstado === 'TODOS' ? leads : leads.filter(l => l.estado === filterEstado)
+  const filteredLeads = filterEstado === 'TODOS' ? leads : leads.filter(l => (l as any).estado === filterEstado || (l as any).estado_lead === filterEstado)
 
   const LEAD_TO_VEHICULO: Record<string, string | null> = {
     NUEVO: null,
