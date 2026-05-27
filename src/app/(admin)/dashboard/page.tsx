@@ -16,7 +16,7 @@ export default async function DashboardPage() {
     .filter(p => p.estado === 'DISPONIBLE')
     .reduce((acc, curr) => acc + Number(curr.precio_venta), 0)
   
-  const leadsNuevos = leads.filter(l => l.estado_lead === 'NUEVO').length
+  const leadsNuevos = leads.filter(l => l.estado === 'NUEVO').length
 
   return (
     <div className="space-y-5 sm:space-y-6">

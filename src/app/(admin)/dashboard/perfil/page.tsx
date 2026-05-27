@@ -9,5 +9,5 @@ export default async function PerfilPage() {
     where: { tenant_id: DEMO_TENANT_ID }
   })
 
-  return <PerfilClient perfil={perfil} tenantId={DEMO_TENANT_ID} />
+  return <PerfilClient perfil={perfil as any} tenantId={DEMO_TENANT_ID} />
 }

@@ -63,7 +63,7 @@ export async function saveProducto(data: Record<string, any>, isNew: boolean, te
           id,
           tenant_id: tenantId,
           ...rest,
-        }
+        } as any
       });
       return { success: true, data: newProd }
     } else {

@@ -10,5 +10,5 @@ export default async function ResenasPage() {
     orderBy: { created_at: 'desc' }
   })
 
-  return <ResenasClient resenas={resenas || []} tenantId={DEMO_TENANT_ID} />
+  return <ResenasClient resenas={(resenas as any) || []} tenantId={DEMO_TENANT_ID} />
 }

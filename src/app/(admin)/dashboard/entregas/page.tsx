@@ -10,5 +10,5 @@ export default async function EntregasPage() {
     orderBy: { created_at: 'desc' } // changed from fecha_entrega because schema.prisma doesn't have fecha_entrega, it has created_at
   })
 
-  return <EntregasClient entregas={entregas || []} tenantId={DEMO_TENANT_ID} />
+  return <EntregasClient entregas={(entregas as any) || []} tenantId={DEMO_TENANT_ID} />
 }
