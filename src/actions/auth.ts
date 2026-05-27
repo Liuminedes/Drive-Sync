@@ -2,21 +2,17 @@
 
 import { cookies } from 'next/headers'
 import { encrypt, decrypt } from '@/lib/auth'
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 export async function login(email: string, passwordPlano: string) {
-  const supabase = await createClient()
-
   try {
     // Buscar al usuario en la base de datos
-    const { data: usuario, error } = await supabase
-      .from('usuarios')
-      .select('*')
-      .eq('email', email)
-      .single()
+    const usuario = await prisma.usuarios.findUnique({
+      where: { email }
+    })
 
-    if (error || !usuario) {
+    if (!usuario) {
       return { success: false, error: 'Credenciales incorrectas' }
     }
 

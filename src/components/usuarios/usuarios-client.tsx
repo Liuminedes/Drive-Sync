@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Edit2, Trash2, Plus, User } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { createUser } from '@/actions/users'
+import { updateUsuario, deleteUsuario } from '@/actions/usuarios'
 import toast from 'react-hot-toast'
 import { Badge } from '@/components/ui/badge'
 
@@ -29,7 +29,6 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
   const [formData, setFormData] = useState({ nombre_completo: '', email: '', password: '', rol: 'ASESOR' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  const supabase = createClient()
   const router = useRouter()
 
   useEffect(() => { setUsuarios(initialUsuarios) }, [initialUsuarios])
@@ -50,8 +49,11 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
     setIsSubmitting(true)
     try {
       if (editingUsuario) {
-        const { error } = await supabase.from('usuarios').update({ nombre_completo: formData.nombre_completo, rol: formData.rol }).eq('id', editingUsuario.id)
-        if (error) throw error
+        if (formData.password && formData.password.length < 6) throw new Error('La contraseña debe tener al menos 6 caracteres')
+        const payload: any = { nombre_completo: formData.nombre_completo, rol: formData.rol }
+        if (formData.password) payload.passwordPlano = formData.password
+        const res = await updateUsuario(editingUsuario.id, payload)
+        if (!res.success) throw new Error(res.error)
         toast.success('Usuario actualizado')
       } else {
         if (!formData.password || formData.password.length < 6) throw new Error('La contraseña debe tener al menos 6 caracteres')
@@ -71,12 +73,12 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de que deseas eliminar a este usuario?')) return
     try {
-      const { error } = await supabase.from('usuarios').delete().eq('id', id)
-      if (error) throw error
+      const res = await deleteUsuario(id)
+      if (!res.success) throw new Error(res.error)
       toast.success('Usuario eliminado')
       router.refresh()
-    } catch (err) {
-      toast.error('Error al eliminar el usuario')
+    } catch (err: any) {
+      toast.error('Error al eliminar el usuario: ' + err.message)
     }
   }
 
@@ -174,10 +176,15 @@ export function UsuariosClient({ initialUsuarios, tenantId }: { initialUsuarios:
               <Input id="email" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required disabled={!!editingUsuario} placeholder="carlos@drivesync.com" className="h-10" />
               {!!editingUsuario && <p className="text-xs text-muted-foreground">El correo no se puede modificar una vez creado.</p>}
             </div>
-            {!editingUsuario && (
+            {!editingUsuario ? (
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
                 <Input id="password" type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required placeholder="Mínimo 6 caracteres" className="h-10" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="password">Nueva Contraseña (Opcional)</Label>
+                <Input id="password" type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="Dejar en blanco para mantener la actual" className="h-10" />
               </div>
             )}
             <div className="space-y-2">

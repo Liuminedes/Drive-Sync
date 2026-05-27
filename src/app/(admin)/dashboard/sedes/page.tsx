@@ -1,20 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { SedesClient } from '@/components/sedes/sedes-client'
 
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
 export default async function SedesPage() {
-  const supabase = await createClient()
-  
-  const { data: sedes, error } = await supabase
-    .from('sedes')
-    .select('*')
-    .eq('tenant_id', DEMO_TENANT_ID)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error cargando sedes:', error)
-  }
+  const sedes = await prisma.sedes.findMany({
+    where: { tenant_id: DEMO_TENANT_ID },
+    orderBy: { created_at: 'desc' }
+  })
 
   return (
     <div className="space-y-6">

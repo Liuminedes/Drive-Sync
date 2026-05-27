@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Edit2, Trash2, Plus, MapPin } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { updateSede, createSede, deleteSede } from '@/actions/sedes'
 import toast from 'react-hot-toast'
 
 interface Sede {
@@ -25,7 +25,6 @@ export function SedesClient({ initialSedes, tenantId }: { initialSedes: Sede[], 
   const [formData, setFormData] = useState({ nombre: '', ciudad: '', direccion: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  const supabase = createClient()
   const router = useRouter()
 
   useEffect(() => { setSedes(initialSedes) }, [initialSedes])
@@ -46,18 +45,18 @@ export function SedesClient({ initialSedes, tenantId }: { initialSedes: Sede[], 
     setIsSubmitting(true)
     try {
       if (editingSede) {
-        const { error } = await supabase.from('sedes').update(formData).eq('id', editingSede.id)
-        if (error) throw error
+        const res = await updateSede(editingSede.id, formData)
+        if (!res.success) throw new Error(res.error)
         toast.success('Sede actualizada')
       } else {
-        const { error } = await supabase.from('sedes').insert({ ...formData, tenant_id: tenantId })
-        if (error) throw error
+        const res = await createSede(formData, tenantId)
+        if (!res.success) throw new Error(res.error)
         toast.success('Sede creada')
       }
       setIsModalOpen(false)
       router.refresh()
-    } catch (err) {
-      toast.error('Error al guardar la sede')
+    } catch (err: any) {
+      toast.error('Error al guardar la sede: ' + err.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -66,12 +65,12 @@ export function SedesClient({ initialSedes, tenantId }: { initialSedes: Sede[], 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de que deseas eliminar esta sede?')) return
     try {
-      const { error } = await supabase.from('sedes').delete().eq('id', id)
-      if (error) throw error
+      const res = await deleteSede(id)
+      if (!res.success) throw new Error(res.error)
       toast.success('Sede eliminada')
       router.refresh()
-    } catch (err) {
-      toast.error('Error al eliminar la sede')
+    } catch (err: any) {
+      toast.error('Error al eliminar la sede: ' + err.message)
     }
   }
 

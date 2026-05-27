@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema } from '@/lib/validations/product'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/client'
+import imageCompression from 'browser-image-compression'
+import { getSedes, getAsesores, deleteProductoFoto, saveProducto, saveProductoFoto, updateProductoFotos } from '@/actions/productos'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { Input } from '@/components/ui/input'
@@ -24,7 +25,6 @@ export function ProductForm({ initialData }: { initialData?: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [sedes, setSedes] = useState<any[]>([])
   const [asesores, setAsesores] = useState<any[]>([])
-  const supabase = createClient()
   const router = useRouter()
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<ProductFormValues>({
@@ -54,10 +54,9 @@ export function ProductForm({ initialData }: { initialData?: any }) {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: s } = await supabase.from('sedes').select('*')
-      if (s) setSedes(s)
-      const { data: a } = await supabase.from('usuarios').select('*').eq('rol', 'ASESOR')
-      if (a) setAsesores(a)
+      const [sedesRes, asesoresRes] = await Promise.all([getSedes(), getAsesores()])
+      if (sedesRes.success) setSedes(sedesRes.data)
+      if (asesoresRes.success) setAsesores(asesoresRes.data)
     }
     fetchData()
   }, [])
@@ -65,15 +64,12 @@ export function ProductForm({ initialData }: { initialData?: any }) {
   const handleDeleteExistingImage = async (id: string, path: string) => {
     if (!confirm('¿Eliminar esta foto permanentemente?')) return
     try {
-      const fileName = path.split('/').pop()
-      if (fileName) {
-        await supabase.storage.from('drive-sync-media').remove([`productos/${fileName}`])
-      }
-      await supabase.from('producto_fotos').delete().eq('id', id)
+      const res = await deleteProductoFoto(id)
+      if (!res.success) throw new Error(res.error)
       setExistingImages(prev => prev.filter(img => img.id !== id))
       toast.success('Foto eliminada')
-    } catch (err) {
-      toast.error('Error al eliminar la foto')
+    } catch (err: any) {
+      toast.error('Error al eliminar la foto: ' + err.message)
     }
   }
 
@@ -81,33 +77,17 @@ export function ProductForm({ initialData }: { initialData?: any }) {
     const newImages = [...existingImages]
     const swapIndex = direction === 'left' ? index - 1 : index + 1
     if (swapIndex < 0 || swapIndex >= newImages.length) return
-
-    // Swap positions
     ;[newImages[index], newImages[swapIndex]] = [newImages[swapIndex], newImages[index]]
-
-    // Update portada: first image is always portada
     const updated = newImages.map((img, i) => ({ ...img, es_portada: i === 0, orden: i }))
     setExistingImages(updated)
-
-    // Persist to DB
-    for (const img of updated) {
-      await supabase
-        .from('producto_fotos')
-        .update({ es_portada: img.es_portada, orden: img.orden })
-        .eq('id', img.id)
-    }
+    await updateProductoFotos(updated.map(img => ({ id: img.id, es_portada: img.es_portada, orden: img.orden })))
     toast.success('Orden actualizado')
   }
 
   const handleSetPortada = async (id: string) => {
     const updated = existingImages.map(img => ({ ...img, es_portada: img.id === id }))
     setExistingImages(updated)
-    for (const img of updated) {
-      await supabase
-        .from('producto_fotos')
-        .update({ es_portada: img.es_portada })
-        .eq('id', img.id)
-    }
+    await updateProductoFotos(updated.map(img => ({ id: img.id, es_portada: img.es_portada, orden: img.orden })))
     toast.success('Portada actualizada')
   }
 
@@ -118,62 +98,50 @@ export function ProductForm({ initialData }: { initialData?: any }) {
       
       let productId = initialData?.id
 
-      if (!productId) {
-        const { data: newProduct, error: productError } = await supabase
-          .from('productos')
-          .insert({
-            tenant_id,
-            sede_id: data.sede_id || null,
-            asesor_id: data.asesor_id || null,
-            categoria: data.categoria,
-            titulo: data.titulo,
-            precio_venta: data.precio_venta,
-            moneda: data.moneda || 'COP',
-            estado: data.estado,
-            detalles: data.detalles
-          })
-          .select()
-          .single()
-
-        if (productError) throw productError
-        productId = newProduct.id
-      } else {
-        const { error: updateError } = await supabase
-          .from('productos')
-          .update({
-            sede_id: data.sede_id || null,
-            asesor_id: data.asesor_id || null,
-            categoria: data.categoria,
-            titulo: data.titulo,
-            precio_venta: data.precio_venta,
-            moneda: data.moneda || 'COP',
-            estado: data.estado,
-            detalles: data.detalles
-          })
-          .eq('id', productId)
-        if (updateError) throw updateError
+      const prodPayload = {
+        id: productId || undefined,
+        sede_id: data.sede_id || null,
+        asesor_id: data.asesor_id || null,
+        categoria: data.categoria,
+        titulo: data.titulo,
+        precio_venta: data.precio_venta,
+        moneda: data.moneda || 'COP',
+        estado: data.estado,
+        detalles: data.detalles
       }
+
+      const prodRes = await saveProducto(prodPayload, !productId, tenant_id)
+      if (!prodRes.success) throw new Error(prodRes.error)
+      if (!productId) productId = (prodRes.data as any)?.id
 
       if (images.length > 0) {
         for (let i = 0; i < images.length; i++) {
           const file = images[i]
-          const fileExt = file.name.split('.').pop()
-          const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-          const filePath = `productos/${safeName}`
+          const options = {
+            maxSizeMB: 0.8,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: 'image/webp'
+          }
+          const compressedFile = await imageCompression(file, options)
           
-          const { error: uploadError } = await supabase.storage
-            .from('drive-sync-media')
-            .upload(filePath, file)
-            
-          if (uploadError) throw uploadError
+          const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`
+          const filePath = `productos/${safeName}`
+          const fd = new FormData()
+          fd.append('file', compressedFile, safeName)
+          fd.append('path', filePath)
 
-          const { data: publicUrlData } = supabase.storage
-            .from('drive-sync-media')
-            .getPublicUrl(filePath)
+          const upRes = await fetch('https://intranet.almotores.com/CyD/wp-content/_api_media_test/upload.php', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer VyntraOrbit_DriveSync_2026_SecureKey!' },
+            body: fd
+          })
+          if (!upRes.ok) throw new Error('Error subiendo imagen')
+          const publicUrl = `https://intranet.almotores.com/CyD/wp-content/_api_media_test/uploads/${filePath}`
 
-          await supabase.from('producto_fotos').insert({
+          await saveProductoFoto({
             producto_id: productId,
-            url: publicUrlData.publicUrl,
+            url: publicUrl,
             es_portada: existingImages.length === 0 && i === 0,
             orden: existingImages.length + i
           })

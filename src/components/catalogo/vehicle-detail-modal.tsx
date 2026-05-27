@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createClient } from '@/lib/supabase/client'
+import { createLead } from '@/actions/leads'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
 import { Check, Settings, Fuel, Activity, Navigation } from 'lucide-react'
@@ -28,10 +28,9 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
   const [showMobileForm, setShowMobileForm] = useState(false)
-  const supabase = createClient()
   
   const { register, handleSubmit, formState: { errors }, reset } = useForm<LeadFormValues>({
-    resolver: zodResolver(leadSchema) as any
+    resolver: zodResolver(leadSchema)
   })
 
   if (!product) return null
@@ -43,21 +42,22 @@ export function VehicleDetailModal({ isOpen, onClose, product }: { isOpen: boole
   const onSubmit = async (data: LeadFormValues) => {
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('leads').insert({
+      const { success, error } = await createLead({
         tenant_id: product.tenant_id,
         producto_id: product.id,
-        nombre_cliente: data.nombre_cliente,
-        email_cliente: data.email_cliente || null,
-        telefono_cliente: data.telefono_cliente,
-        mensaje: data.mensaje || null,
+        nombre: data.nombre_cliente,
+        email: data.email_cliente,
+        telefono: data.telefono_cliente,
         origen: 'CATALOGO_PUBLICO'
       })
-      if (error) throw error
+
+      if (!success) throw new Error(error || 'Error al enviar lead')
+
       toast.success('¡Solicitud enviada! Un asesor te contactará pronto.')
       reset()
       onClose()
     } catch (err: any) {
-      toast.error('Hubo un error al enviar tu solicitud.')
+      toast.error(err.message || 'Hubo un error al enviar tu solicitud.')
       console.error(err)
     } finally {
       setIsSubmitting(false)

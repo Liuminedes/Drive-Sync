@@ -1,19 +1,14 @@
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { KpiCard } from '@/components/dashboard/kpi-card'
 import { Car, DollarSign, Users } from 'lucide-react'
 
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  
-  const [productosRes, leadsRes] = await Promise.all([
-    supabase.from('productos').select('*').eq('tenant_id', DEMO_TENANT_ID),
-    supabase.from('leads').select('*').eq('tenant_id', DEMO_TENANT_ID)
+  const [productos, leads] = await Promise.all([
+    prisma.productos.findMany({ where: { tenant_id: DEMO_TENANT_ID } }),
+    prisma.leads.findMany({ where: { tenant_id: DEMO_TENANT_ID } })
   ])
-
-  const productos = productosRes.data || []
-  const leads = leadsRes.data || []
 
   const totalVehiculos = productos.length
   const disponibles = productos.filter(p => p.estado === 'DISPONIBLE').length

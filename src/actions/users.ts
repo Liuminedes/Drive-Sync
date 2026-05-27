@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 export async function createUser(data: {
@@ -11,14 +11,11 @@ export async function createUser(data: {
   passwordPlano: string
 }) {
   try {
-    const supabase = await createClient()
-
     // 1. Verificar si el email ya existe en la tabla usuarios
-    const { data: existingUser } = await supabase
-      .from('usuarios')
-      .select('id')
-      .eq('email', data.email)
-      .single()
+    const existingUser = await prisma.usuarios.findUnique({
+      where: { email: data.email },
+      select: { id: true }
+    })
 
     if (existingUser) {
       return { success: false, error: 'El correo ya está registrado en el sistema' }
@@ -29,15 +26,15 @@ export async function createUser(data: {
     const password_hash = await bcrypt.hash(data.passwordPlano, salt)
 
     // 3. Insertar el usuario
-    const { error } = await supabase.from('usuarios').insert({
-      tenant_id: data.tenant_id,
-      nombre_completo: data.nombre_completo,
-      email: data.email,
-      rol: data.rol,
-      password_hash: password_hash
+    await prisma.usuarios.create({
+      data: {
+        tenant_id: data.tenant_id,
+        nombre_completo: data.nombre_completo,
+        email: data.email,
+        rol: data.rol,
+        password_hash: password_hash
+      }
     })
-
-    if (error) throw error
 
     return { success: true }
   } catch (err: any) {

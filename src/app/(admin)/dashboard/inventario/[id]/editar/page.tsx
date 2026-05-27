@@ -1,28 +1,22 @@
 import { ProductForm } from '@/components/inventario/product-form'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
 export default async function EditarProductoPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
-  const supabase = await createClient()
 
-  const { data: producto, error } = await supabase
-    .from('productos')
-    .select(`
-      *,
-      producto_fotos (*)
-    `)
-    .eq('id', resolvedParams.id)
-    .single()
+  const producto = await prisma.productos.findUnique({
+    where: { id: resolvedParams.id },
+    include: {
+      producto_fotos: {
+        orderBy: { orden: 'asc' }
+      }
+    }
+  })
 
-  // Ordenar fotos por el campo 'orden'
-  if (producto?.producto_fotos) {
-    producto.producto_fotos.sort((a: any, b: any) => (a.orden ?? 0) - (b.orden ?? 0))
-  }
-
-  if (error || !producto) {
+  if (!producto) {
     notFound()
   }
 

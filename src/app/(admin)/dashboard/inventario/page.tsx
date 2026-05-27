@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { ProductTable } from '@/components/inventario/product-table'
 import { InventoryFilters } from '@/components/inventario/inventory-filters'
 import Link from 'next/link'
@@ -11,39 +11,40 @@ export default async function InventarioPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const searchParams = await props.searchParams
-  const supabase = await createClient()
   
   const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1
   const search = typeof searchParams.q === 'string' ? searchParams.q : ''
   const estado = typeof searchParams.estado === 'string' ? searchParams.estado : 'TODOS'
 
   const pageSize = 10
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
+  const skip = (page - 1) * pageSize
 
-  let query = supabase
-    .from('productos')
-    .select(`
-      *,
-      producto_fotos (url, es_portada)
-    `, { count: 'exact' })
-    .eq('tenant_id', DEMO_TENANT_ID)
+  const whereCondition: any = {
+    tenant_id: DEMO_TENANT_ID,
+  }
 
   if (search) {
-    query = query.ilike('titulo', `%${search}%`)
+    whereCondition.titulo = { contains: search }
   }
 
   if (estado && estado !== 'TODOS') {
-    query = query.eq('estado', estado)
+    whereCondition.estado = estado
   }
 
-  const { data: productos, error, count } = await query
-    .order('created_at', { ascending: false })
-    .range(from, to)
-
-  if (error) {
-    console.error('Error cargando inventario:', error)
-  }
+  const [productos, count] = await Promise.all([
+    prisma.productos.findMany({
+      where: whereCondition,
+      include: {
+        producto_fotos: {
+          select: { url: true, es_portada: true }
+        }
+      },
+      orderBy: { created_at: 'desc' },
+      skip,
+      take: pageSize,
+    }),
+    prisma.productos.count({ where: whereCondition })
+  ])
 
   const totalPages = count ? Math.ceil(count / pageSize) : 1
 

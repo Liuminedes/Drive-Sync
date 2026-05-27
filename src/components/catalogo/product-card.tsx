@@ -64,7 +64,7 @@ export function ProductCard({ product, precioFormateado, layout = 'grid' }: Prop
             <h2 className={`font-semibold tracking-tight leading-tight line-clamp-2 cursor-pointer hover:text-primary transition-colors ${layout === 'list' ? 'text-[15px] sm:text-lg' : 'text-[14px] sm:text-lg'}`} onClick={() => setIsModalOpen(true)}>{product.titulo}</h2>
             <div className={`text-muted-foreground flex flex-wrap gap-x-1.5 sm:gap-x-2 gap-y-1 items-center ${layout === 'list' ? 'text-[11px] sm:text-sm' : 'text-[11px] sm:text-sm'}`}>
               {anio && <span className="bg-muted px-1.5 sm:px-2 py-0.5 rounded-md text-foreground font-medium">{anio}</span>}
-              {kilometraje && <span>• {Number(kilometraje).toLocaleString()} km</span>}
+              {kilometraje && <span suppressHydrationWarning>• {Number(kilometraje).toLocaleString('es-CO')} km</span>}
               {marca && <span>• {marca}</span>}
             </div>
             <div className={`mt-auto pt-2 sm:pt-3 flex items-end ${layout === 'list' ? '' : 'justify-between'}`}>

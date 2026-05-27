@@ -1,64 +1,80 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/admin'
+import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export async function toggleVisibleResena(id: string, visible: boolean) {
-  const supabase = createAdminClient()
-  const { error } = await supabase.from('resenas').update({ visible }).eq('id', id)
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/dashboard/resenas')
-  revalidatePath('/catalogo')
-  return { success: true }
+  try {
+    await prisma.resenas.update({ where: { id }, data: { visible } })
+    revalidatePath('/dashboard/resenas')
+    revalidatePath('/catalogo')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }
 
 export async function deleteResena(id: string) {
-  const supabase = createAdminClient()
-  const { error } = await supabase.from('resenas').delete().eq('id', id)
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/dashboard/resenas')
-  revalidatePath('/catalogo')
-  return { success: true }
+  try {
+    await prisma.resenas.delete({ where: { id } })
+    revalidatePath('/dashboard/resenas')
+    revalidatePath('/catalogo')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }
 
 export async function upsertResena(data: Record<string, any>, tenantId: string) {
-  const supabase = createAdminClient()
-  const payload = { ...data, tenant_id: tenantId }
-  const { error } = data.id
-    ? await supabase.from('resenas').update(payload).eq('id', data.id)
-    : await supabase.from('resenas').insert(payload)
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/dashboard/resenas')
-  revalidatePath('/catalogo')
-  return { success: true }
+  try {
+    const payload: any = { ...data, tenant_id: tenantId }
+    if (data.id) {
+      await prisma.resenas.update({ where: { id: data.id }, data: payload })
+    } else {
+      await prisma.resenas.create({ data: payload })
+    }
+    revalidatePath('/dashboard/resenas')
+    revalidatePath('/catalogo')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }
 
 export async function toggleVisibleEntrega(id: string, visible: boolean) {
-  const supabase = createAdminClient()
-  const { error } = await supabase.from('entregas').update({ visible }).eq('id', id)
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/dashboard/entregas')
-  revalidatePath('/catalogo')
-  return { success: true }
+  try {
+    await prisma.entregas.update({ where: { id }, data: { visible } })
+    revalidatePath('/dashboard/entregas')
+    revalidatePath('/catalogo')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }
 
 export async function deleteEntrega(id: string) {
-  const supabase = createAdminClient()
-  const { error } = await supabase.from('entregas').delete().eq('id', id)
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/dashboard/entregas')
-  revalidatePath('/catalogo')
-  return { success: true }
+  try {
+    await prisma.entregas.delete({ where: { id } })
+    revalidatePath('/dashboard/entregas')
+    revalidatePath('/catalogo')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }
 
 export async function upsertEntrega(data: Record<string, any>, tenantId: string) {
-  const supabase = createAdminClient()
-  const payload = { ...data, tenant_id: tenantId }
-  const { error } = data.id
-    ? await supabase.from('entregas').update(payload).eq('id', data.id)
-    : await supabase.from('entregas').insert(payload)
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/dashboard/entregas')
-  revalidatePath('/catalogo')
-  return { success: true }
+  try {
+    const payload: any = { ...data, tenant_id: tenantId }
+    if (data.id) {
+      await prisma.entregas.update({ where: { id: data.id }, data: payload })
+    } else {
+      await prisma.entregas.create({ data: payload })
+    }
+    revalidatePath('/dashboard/entregas')
+    revalidatePath('/catalogo')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }

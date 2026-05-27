@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Eye, Trash2, Phone, Mail, MessageSquare, Calendar, ExternalLink } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { updateLeadEstado, assignLeadAsesor, deleteLead } from '@/actions/leads'
 import toast from 'react-hot-toast'
 
 interface Lead {
@@ -61,12 +61,11 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
   const [filterEstado, setFilterEstado] = useState<string>('TODOS')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-  const supabase = createClient()
   const router = useRouter()
 
   useEffect(() => { setLeads(initialLeads) }, [initialLeads])
 
-  const filteredLeads = filterEstado === 'TODOS' ? leads : leads.filter(l => l.estado_lead === filterEstado)
+  const filteredLeads = filterEstado === 'TODOS' ? leads : leads.filter(l => l.estado === filterEstado)
 
   const LEAD_TO_VEHICULO: Record<string, string | null> = {
     NUEVO: null,
@@ -80,13 +79,12 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
     if (!nuevoEstado) return
     setUpdatingId(leadId)
     try {
-      const { error, status, statusText } = await supabase.from('leads').update({ estado_lead: nuevoEstado }).eq('id', leadId)
-      if (error) throw new Error(error.message || `Error ${status}: ${statusText}`)
       const lead = leads.find(l => l.id === leadId)
       const nuevoEstadoVehiculo = LEAD_TO_VEHICULO[nuevoEstado]
+      const res = await updateLeadEstado(leadId, nuevoEstado, lead?.producto_id ?? undefined, nuevoEstadoVehiculo ?? undefined)
+      if (!res.success) throw new Error(res.error)
       if (lead?.producto_id && nuevoEstadoVehiculo) {
-        const { error: prodError } = await supabase.from('productos').update({ estado: nuevoEstadoVehiculo }).eq('id', lead.producto_id)
-        if (!prodError) toast.success(`Vehículo actualizado a "${nuevoEstadoVehiculo.replace('_', ' ')}"`, { icon: '🚗' })
+        toast.success(`Vehículo actualizado a "${nuevoEstadoVehiculo.replace('_', ' ')}"`, { icon: '🚗' })
       }
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, estado_lead: nuevoEstado } : l))
       if (selectedLead?.id === leadId) setSelectedLead(prev => prev ? { ...prev, estado_lead: nuevoEstado } : null)
@@ -100,8 +98,8 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
 
   const handleAssignAsesor = async (leadId: string, asesorId: string) => {
     try {
-      const { error } = await supabase.from('leads').update({ atendido_por: asesorId || null }).eq('id', leadId)
-      if (error) throw new Error(error.message)
+      const res = await assignLeadAsesor(leadId, asesorId || null)
+      if (!res.success) throw new Error(res.error)
       const asesor = asesores.find(a => a.id === asesorId)
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, atendido_por: asesorId || null, usuarios: asesor ? { nombre_completo: asesor.nombre_completo } : null } : l))
       if (selectedLead?.id === leadId) setSelectedLead(prev => prev ? { ...prev, atendido_por: asesorId || null, usuarios: asesor ? { nombre_completo: asesor.nombre_completo } : null } : null)
@@ -114,8 +112,8 @@ export function LeadsClient({ initialLeads, asesores }: { initialLeads: Lead[], 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de que deseas eliminar este lead?')) return
     try {
-      const { error } = await supabase.from('leads').delete().eq('id', id)
-      if (error) throw error
+      const res = await deleteLead(id)
+      if (!res.success) throw new Error(res.error)
       setLeads(prev => prev.filter(l => l.id !== id))
       if (selectedLead?.id === id) setSelectedLead(null)
       toast.success('Lead eliminado')

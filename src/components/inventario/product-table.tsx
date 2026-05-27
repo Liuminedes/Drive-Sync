@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Eye, Edit2, Trash2 } from 'lucide-react'
 import { VehicleDetailModal } from '../catalogo/vehicle-detail-modal'
-import { createClient } from '@/lib/supabase/client'
+import { deleteProducto } from '@/actions/productos'
 import toast from 'react-hot-toast'
 
 interface ProductTableProps {
@@ -15,23 +15,21 @@ interface ProductTableProps {
   currentPage?: number
   totalPages?: number
 }
-
 export function ProductTable({ productos, currentPage = 1, totalPages = 1 }: ProductTableProps) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer.')) return
     setIsDeleting(id)
     try {
-      const { error } = await supabase.from('productos').delete().eq('id', id)
-      if (error) throw error
+      const res = await deleteProducto(id)
+      if (!res.success) throw new Error(res.error)
       toast.success('Vehículo eliminado correctamente')
       router.refresh()
-    } catch (err) {
-      toast.error('Error al eliminar el vehículo')
+    } catch (err: any) {
+      toast.error('Error al eliminar: ' + err.message)
       console.error(err)
     } finally {
       setIsDeleting(null)

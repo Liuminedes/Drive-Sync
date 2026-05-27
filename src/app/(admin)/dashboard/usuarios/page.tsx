@@ -1,20 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { UsuariosClient } from '@/components/usuarios/usuarios-client'
 
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
 export default async function UsuariosPage() {
-  const supabase = await createClient()
-  
-  const { data: usuarios, error } = await supabase
-    .from('usuarios')
-    .select('*')
-    .eq('tenant_id', DEMO_TENANT_ID)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error cargando usuarios:', error)
-  }
+  const usuarios = await prisma.usuarios.findMany({
+    where: { tenant_id: DEMO_TENANT_ID },
+    orderBy: { created_at: 'desc' }
+  })
 
   return (
     <div className="space-y-6">

@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model tenants {
+  id                    String    @id @default(uuid())
+  nombre                String
+  logo_url              String?
+  dominio_personalizado String?
+  configuracion         Json?
+  created_at            DateTime? @default(now())
+  updated_at            DateTime? @updatedAt
+}
+
+model sedes {
+  id         String    @id @default(uuid())
+  tenant_id  String
+  nombre     String
+  ciudad     String?
+  direccion  String?
+  created_at DateTime? @default(now())
+}
+
+model usuarios {
+  id              String    @id @default(uuid())
+  tenant_id       String
+  nombre_completo String
+  email           String    @unique
+  rol             String
+  password_hash   String
+  created_at      DateTime? @default(now())
+
+  leads           leads[]
+}
+
+model perfil_asesor {
+  tenant_id         String @id
+  nombre            String?
+  cargo             String?
+  concesionario     String?
+  frase             String?
+  telefono          String?
+  email             String?
+  instagram         String?
+  linkedin          String?
+  foto_url          String?
+  anios_exp         String?
+  ventas_realizadas String?
+  calificacion      String?
+  logo_empresa_url  String?
+}
+
+model productos {
+  id           String    @id @default(uuid())
+  tenant_id    String
+  sede_id      String?
+  categoria    String
+  titulo       String
+  descripcion  String?
+  precio_venta Float
+  moneda       String?   @default("COP")
+  estado       String?   @default("DISPONIBLE")
+  detalles     Json?
+  destacado    Boolean?  @default(false)
+  asesor_id    String?
+  created_at   DateTime? @default(now())
+  updated_at   DateTime? @updatedAt
+
+  producto_fotos producto_fotos[]
+  leads          leads[]
+}
+
+model producto_fotos {
+  id          String    @id @default(uuid())
+  producto_id String
+  url         String
+  es_portada  Boolean?  @default(false)
+  orden       Int?      @default(0)
+  created_at  DateTime? @default(now())
+
+  producto    productos @relation(fields: [producto_id], references: [id], onDelete: Cascade)
+}
+
+model resenas {
+  id         String    @id @default(uuid())
+  tenant_id  String
+  titulo     String?
+  contenido  String?
+  visible    Boolean?  @default(true)
+  fotos      Json?
+  created_at DateTime? @default(now())
+}
+
+model entregas {
+  id          String    @id @default(uuid())
+  tenant_id   String
+  titulo      String?
+  descripcion String?
+  visible     Boolean?  @default(true)
+  fotos       Json?
+  created_at  DateTime? @default(now())
+}
+
+model leads {
+  id           String    @id @default(uuid())
+  tenant_id    String
+  nombre       String?
+  email        String?
+  telefono     String?
+  origen       String?
+  estado       String?   @default("NUEVO")
+  created_at   DateTime? @default(now())
+  producto_id  String?
+  atendido_por String?
+
+  productos    productos? @relation(fields: [producto_id], references: [id])
+  usuarios     usuarios?  @relation(fields: [atendido_por], references: [id])
+}

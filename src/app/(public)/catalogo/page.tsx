@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { AdvisorCard } from '@/components/catalogo/advisor-card'
 import { ResenasSectionPublic } from '@/components/resenas/resenas-section-public'
 import { EntregasSectionPublic } from '@/components/entregas/entregas-section-public'
@@ -8,23 +8,31 @@ export const dynamic = 'force-dynamic'
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
 export default async function CatalogoPage() {
-  const supabase = await createClient()
-
-  const [productosRes, resenasRes, entregasRes] = await Promise.all([
-    supabase
-      .from('productos')
-      .select('*, producto_fotos (url, es_portada)')
-      .eq('tenant_id', DEMO_TENANT_ID)
-      .eq('estado', 'DISPONIBLE')
-      .order('destacado', { ascending: false })
-      .order('created_at', { ascending: false }),
-    supabase.from('resenas').select('*').eq('tenant_id', DEMO_TENANT_ID).eq('visible', true).order('created_at', { ascending: false }),
-    supabase.from('entregas').select('*').eq('tenant_id', DEMO_TENANT_ID).eq('visible', true).order('fecha_entrega', { ascending: false }),
+  const [productos, resenas, entregas] = await Promise.all([
+    prisma.productos.findMany({
+      where: {
+        tenant_id: DEMO_TENANT_ID,
+        estado: 'DISPONIBLE'
+      },
+      include: {
+        producto_fotos: {
+          select: { url: true, es_portada: true }
+        }
+      },
+      orderBy: [
+        { destacado: 'desc' },
+        { created_at: 'desc' }
+      ]
+    }),
+    prisma.resenas.findMany({
+      where: { tenant_id: DEMO_TENANT_ID, visible: true },
+      orderBy: { created_at: 'desc' }
+    }),
+    prisma.entregas.findMany({
+      where: { tenant_id: DEMO_TENANT_ID, visible: true },
+      orderBy: { created_at: 'desc' }
+    })
   ])
-
-  const productos = productosRes.data ?? []
-  const resenas   = resenasRes.data ?? []
-  const entregas  = entregasRes.data ?? []
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-background">

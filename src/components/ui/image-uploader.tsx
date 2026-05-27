@@ -6,15 +6,16 @@
  *  - Drag & drop
  *  - Selección múltiple
  *  - Vista previa local antes de subir
- *  - Subida a Supabase Storage (bucket: drive-sync-media)
+ *  - Subida a Gigacore (_api_media_test)
  *  - Retorna URLs públicas ya subidas
  */
 'use client'
 
 import { useCallback, useState } from 'react'
+import imageCompression from 'browser-image-compression'
 import Image from 'next/image'
 import { UploadCloud, X, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+
 
 interface Props {
   /** Carpeta dentro del bucket, ej: "entregas" | "resenas" | "perfil" */
@@ -32,7 +33,6 @@ export function ImageUploader({ folder, maxFiles, onUploaded, hint }: Props) {
   const [previews, setPreviews]       = useState<{ file: File; url: string }[]>([])
   const [uploading, setUploading]     = useState(false)
   const [progress, setProgress]       = useState(0)
-  const supabase = createClient()
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const arr = Array.from(files).filter(f => f.type.startsWith('image/'))
@@ -71,25 +71,38 @@ export function ImageUploader({ folder, maxFiles, onUploaded, hint }: Props) {
     try {
       for (let i = 0; i < previews.length; i++) {
         const { file } = previews[i]
-        const ext      = file.name.split('.').pop()
+        
+        // Compress image before uploading
+        const options = {
+          maxSizeMB: 0.8, // Compress to max 800KB
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: 'image/webp' // Convert to WebP for best compression
+        }
+        
+        const compressedFile = await imageCompression(file, options)
+        const ext = 'webp'
         const name     = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
         const path     = `${folder}/${name}`
+        const fd       = new FormData()
+        fd.append('file', compressedFile, name)
+        fd.append('path', path)
 
-        const { error } = await supabase.storage
-          .from('drive-sync-media')
-          .upload(path, file, { upsert: false })
+        const res = await fetch('https://intranet.almotores.com/CyD/wp-content/_api_media_test/upload.php', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer VyntraOrbit_DriveSync_2026_SecureKey!' },
+          body: fd
+        })
 
-        if (error) throw error
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.error || 'Error al subir la imagen')
+        }
 
-        const { data } = supabase.storage
-          .from('drive-sync-media')
-          .getPublicUrl(path)
-
-        urls.push(data.publicUrl)
+        urls.push(`https://intranet.almotores.com/CyD/wp-content/_api_media_test/uploads/${path}`)
         setProgress(Math.round(((i + 1) / previews.length) * 100))
       }
       onUploaded(urls)
-      // Limpiar previews después de subir
       previews.forEach(p => URL.revokeObjectURL(p.url))
       setPreviews([])
     } catch (err: any) {

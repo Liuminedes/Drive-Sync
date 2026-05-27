@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import imageCompression from 'browser-image-compression'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ImageUpload } from '@/components/inventario/image-upload'
 import { Plus, Pencil, Trash2, Eye, EyeOff, ArrowLeft, ArrowRight, Star } from 'lucide-react'
 import { toggleVisibleEntrega, deleteEntrega, upsertEntrega } from '@/actions/content'
-import { createClient } from '@/lib/supabase/client'
+
 import toast from 'react-hot-toast'
 
 interface EntregaFoto { url: string; es_portada: boolean; orden: number }
@@ -29,7 +30,7 @@ export function EntregasClient({ entregas: initial, tenantId }: { entregas: Entr
   const [saving, setSaving]     = useState(false)
   const [newFiles, setNewFiles]         = useState<File[]>([])
   const [existingFotos, setExistingFotos] = useState<EntregaFoto[]>([])
-  const supabase = createClient()
+
 
   function openNew() { setEditing(EMPTY); setNewFiles([]); setExistingFotos([]); setOpen(true) }
   function openEdit(e: Entrega) {
@@ -69,12 +70,20 @@ export function EntregasClient({ entregas: initial, tenantId }: { entregas: Entr
     try {
       const uploadedUrls: string[] = []
       for (const file of newFiles) {
-        const ext=file.name.split('.').pop()
-        const path=`entregas/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-        const {error} = await supabase.storage.from('drive-sync-media').upload(path, file)
-        if (error) throw error
-        const {data} = supabase.storage.from('drive-sync-media').getPublicUrl(path)
-        uploadedUrls.push(data.publicUrl)
+        const options = { maxSizeMB: 0.8, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' }
+        const compressedFile = await imageCompression(file, options)
+        const name = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`
+        const path = `entregas/${name}`
+        const fd   = new FormData()
+        fd.append('file', compressedFile, name)
+        fd.append('path', path)
+        const res = await fetch('https://intranet.almotores.com/CyD/wp-content/_api_media_test/upload.php', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer VyntraOrbit_DriveSync_2026_SecureKey!' },
+          body: fd
+        })
+        if (!res.ok) throw new Error('Error subiendo imagen')
+        uploadedUrls.push(`https://intranet.almotores.com/CyD/wp-content/_api_media_test/uploads/${path}`)
       }
       const todas = [...existingFotos.map(f=>f.url), ...uploadedUrls]
       const payload = {

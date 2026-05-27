@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import imageCompression from 'browser-image-compression'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +14,7 @@ import { Plus, Pencil, Trash2, Eye, EyeOff, X } from 'lucide-react'
 import { ImageUpload } from '@/components/inventario/image-upload'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toggleVisibleResena, deleteResena, upsertResena } from '@/actions/content'
-import { createClient } from '@/lib/supabase/client'
+
 import toast from 'react-hot-toast'
 
 interface Resena {
@@ -31,7 +32,7 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
   const [fotoUrl, setFotoUrl]   = useState('')
   const [saving, setSaving]     = useState(false)
   const [, startTransition]     = useTransition()
-  const supabase = createClient()
+
 
   function openNew() { setEditing(EMPTY); setFotoFiles([]); setFotoUrl(''); setOpen(true) }
   function openEdit(r: Resena) { setEditing(r); setFotoFiles([]); setFotoUrl(r.foto_url||''); setOpen(true) }
@@ -68,13 +69,20 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
 
       // Subir foto si hay archivo nuevo
       if (fotoFiles[0]) {
-        const ext   = fotoFiles[0].name.split('.').pop()
-        const path  = `resenas/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-        const bytes = await fotoFiles[0].arrayBuffer()
-        const { error } = await supabase.storage.from('drive-sync-media').upload(path, bytes, { contentType: fotoFiles[0].type })
-        if (error) throw error
-        const { data } = supabase.storage.from('drive-sync-media').getPublicUrl(path)
-        finalFotoUrl = data.publicUrl
+        const options = { maxSizeMB: 0.8, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' }
+        const compressedFile = await imageCompression(fotoFiles[0], options)
+        const name = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`
+        const path = `resenas/${name}`
+        const fd   = new FormData()
+        fd.append('file', compressedFile, name)
+        fd.append('path', path)
+        const res = await fetch('https://intranet.almotores.com/CyD/wp-content/_api_media_test/upload.php', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer VyntraOrbit_DriveSync_2026_SecureKey!' },
+          body: fd
+        })
+        if (!res.ok) throw new Error('Error subiendo imagen')
+        finalFotoUrl = `https://intranet.almotores.com/CyD/wp-content/_api_media_test/uploads/${path}`
       }
 
       const payload = {

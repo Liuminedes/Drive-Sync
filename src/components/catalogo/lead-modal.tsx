@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createClient } from '@/lib/supabase/client'
+import { createLead } from '@/actions/leads'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
 
@@ -23,7 +23,6 @@ type LeadFormValues = z.infer<typeof leadSchema>
 
 export function LeadModal({ isOpen, onClose, product }: { isOpen: boolean, onClose: () => void, product: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const supabase = createClient()
   
   const { register, handleSubmit, formState: { errors }, reset } = useForm<LeadFormValues>({
     resolver: zodResolver(leadSchema)
@@ -32,7 +31,7 @@ export function LeadModal({ isOpen, onClose, product }: { isOpen: boolean, onClo
   const onSubmit = async (data: LeadFormValues) => {
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('leads').insert({
+      const { success, error } = await createLead({
         tenant_id: product.tenant_id,
         producto_id: product.id,
         nombre_cliente: data.nombre_cliente,
@@ -42,7 +41,7 @@ export function LeadModal({ isOpen, onClose, product }: { isOpen: boolean, onClo
         origen: 'CATALOGO_PUBLICO'
       })
 
-      if (error) throw error
+      if (!success) throw new Error(error || 'No se pudo enviar el contacto')
 
       toast.success('¡Solicitud enviada! Un asesor te contactará pronto.')
       reset()

@@ -1,16 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { Phone, MessageCircle, Star, Building2 } from 'lucide-react'
 import Image from 'next/image'
 
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
 export async function AdvisorCard() {
-  const supabase = await createClient()
-  const { data: perfil } = await supabase
-    .from('perfil_asesor')
-    .select('*')
-    .eq('tenant_id', DEMO_TENANT_ID)
-    .single()
+  const perfil = await prisma.perfil_asesor.findUnique({
+    where: { tenant_id: DEMO_TENANT_ID }
+  })
 
   if (!perfil?.nombre) return null
 
