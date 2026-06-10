@@ -10,5 +10,21 @@ export default async function EntregasPage() {
     orderBy: { created_at: 'desc' } // changed from fecha_entrega because schema.prisma doesn't have fecha_entrega, it has created_at
   })
 
-  return <EntregasClient entregas={(entregas as any) || []} tenantId={DEMO_TENANT_ID} />
+  const mappedEntregas = entregas.map(e => {
+    let extra: any = {}
+    try { extra = typeof e.fotos === 'string' ? JSON.parse(e.fotos) : (e.fotos || {}) } catch(err){}
+    return {
+      id: e.id,
+      tenant_id: e.tenant_id,
+      cliente_nombre: e.titulo || '',
+      vehiculo: extra?.vehiculo || '',
+      fecha_entrega: extra?.fecha_entrega || e.created_at?.toISOString() || '',
+      foto_principal: extra?.foto_principal || '',
+      fotos_extra: extra?.fotos_extra || '[]',
+      nota: e.descripcion || '',
+      visible: e.visible ?? true
+    }
+  })
+
+  return <EntregasClient entregas={mappedEntregas} tenantId={DEMO_TENANT_ID} />
 }

@@ -10,5 +10,21 @@ export default async function ResenasPage() {
     orderBy: { created_at: 'desc' }
   })
 
-  return <ResenasClient resenas={(resenas as any) || []} tenantId={DEMO_TENANT_ID} />
+  const mappedResenas = resenas.map(r => {
+    let extra: any = {}
+    try { extra = typeof r.fotos === 'string' ? JSON.parse(r.fotos) : (r.fotos || {}) } catch(e){}
+    return {
+      id: r.id,
+      tenant_id: r.tenant_id,
+      nombre_cliente: r.titulo || '',
+      vehiculo_comprado: extra?.vehiculo_comprado || '',
+      texto: r.contenido || '',
+      estrellas: extra?.estrellas || 5,
+      foto_url: extra?.foto_url || '',
+      visible: r.visible ?? true,
+      created_at: r.created_at?.toISOString() || ''
+    }
+  })
+
+  return <ResenasClient resenas={mappedResenas} tenantId={DEMO_TENANT_ID} />
 }

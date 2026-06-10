@@ -73,7 +73,15 @@ export default async function CatalogoPage() {
         {resenas.length > 0 && (
           <section id="resenas" className="border-t border-border/40 bg-white dark:bg-muted/5">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16">
-              <ResenasSectionPublic resenas={(resenas as any) || []} />
+              <ResenasSectionPublic resenas={resenas.map(r => {
+                let extra: any = {}
+                try { extra = typeof r.fotos === 'string' ? JSON.parse(r.fotos) : (r.fotos || {}) } catch(e){}
+                return {
+                  id: r.id, nombre_cliente: r.titulo || '', vehiculo_comprado: extra?.vehiculo_comprado || '',
+                  texto: r.contenido || '', estrellas: extra?.estrellas || 5, foto_url: extra?.foto_url || '',
+                  visible: r.visible ?? true, created_at: r.created_at?.toISOString() || '', tenant_id: r.tenant_id
+                }
+              })} />
             </div>
           </section>
         )}
@@ -81,7 +89,16 @@ export default async function CatalogoPage() {
         {entregas.length > 0 && (
           <section id="entregas" className="border-t border-border/40">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16">
-              <EntregasSectionPublic entregas={(entregas as any) || []} />
+              <EntregasSectionPublic entregas={entregas.map(e => {
+                let extra: any = {}
+                try { extra = typeof e.fotos === 'string' ? JSON.parse(e.fotos) : (e.fotos || {}) } catch(err){}
+                return {
+                  id: e.id, cliente_nombre: e.titulo || '', vehiculo: extra?.vehiculo || '',
+                  fecha_entrega: extra?.fecha_entrega || e.created_at?.toISOString() || '',
+                  foto_principal: extra?.foto_principal || '', fotos_extra: extra?.fotos_extra || '[]',
+                  nota: e.descripcion || '', visible: e.visible ?? true, tenant_id: e.tenant_id
+                }
+              })} />
             </div>
           </section>
         )}
