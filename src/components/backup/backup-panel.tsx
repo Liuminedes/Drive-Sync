@@ -24,18 +24,18 @@ export function BackupPanel() {
       let text = strFromU8(files['data.json'])
 
       // 1. Subir imágenes y reescribir sus rutas relativas a las URLs nuevas
-      const imgs = Object.keys(files).filter((n) => n.startsWith('images/'))
+      const imgs = Object.keys(files).filter((n) => n.startsWith('images/') && !n.endsWith('/'))
       const map: Record<string, string> = {}
       for (const [i, name] of imgs.entries()) {
         setStatus(`Subiendo imágenes ${i + 1}/${imgs.length}…`)
         const ext = name.split('.').pop()!.toLowerCase()
         const fd = new FormData()
         fd.append('file', new File([files[name] as BlobPart], name.split('/').pop()!, { type: MIME[ext] ?? 'image/jpeg' }))
-        const res = await uploadToGigacore(fd, 'restaurado')
+        const res = await uploadToGigacore(fd, name.slice(7, name.lastIndexOf('/')) || 'restaurado') // misma carpeta que en el zip
         if (!res.success) throw new Error(`No se pudo subir ${name}: ${res.error}`)
         map[name] = res.url
       }
-      text = text.replace(/images\/\d+\.\w+/g, (m) => map[m] ?? m)
+      text = text.replace(/images\/[\w./-]+/g, (m) => map[m] ?? m)
       const data = JSON.parse(text)
       if (data?.meta?.version !== 1) throw new Error('Versión de backup no soportada')
 
