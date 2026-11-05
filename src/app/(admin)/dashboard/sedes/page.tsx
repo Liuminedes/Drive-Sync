@@ -1,11 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import { SedesClient } from '@/components/sedes/sedes-client'
+import { requireTenantSession } from '@/lib/tenant'
 
-const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
+export const dynamic = 'force-dynamic'
 
 export default async function SedesPage() {
+  const { tenantId } = await requireTenantSession()
+
   const sedes = await prisma.sedes.findMany({
-    where: { tenant_id: DEMO_TENANT_ID },
+    where: { tenant_id: tenantId },
     orderBy: { created_at: 'desc' }
   })
 
@@ -18,7 +21,7 @@ export default async function SedesPage() {
         </div>
       </div>
 
-      <SedesClient initialSedes={(sedes as any) || []} tenantId={DEMO_TENANT_ID} />
+      <SedesClient initialSedes={(sedes as any) || []} tenantId={tenantId} />
     </div>
   )
 }

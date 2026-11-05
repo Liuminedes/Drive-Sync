@@ -1,12 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import { ResenasClient } from '@/components/resenas/resenas-client'
+import { requireTenantSession } from '@/lib/tenant'
 
 export const dynamic = 'force-dynamic'
-const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
 export default async function ResenasPage() {
+  const { tenantId } = await requireTenantSession()
+
   const resenas = await prisma.resenas.findMany({
-    where: { tenant_id: DEMO_TENANT_ID },
+    where: { tenant_id: tenantId },
     orderBy: { created_at: 'desc' }
   })
 
@@ -26,5 +28,5 @@ export default async function ResenasPage() {
     }
   })
 
-  return <ResenasClient resenas={mappedResenas} tenantId={DEMO_TENANT_ID} />
+  return <ResenasClient resenas={mappedResenas} tenantId={tenantId} />
 }

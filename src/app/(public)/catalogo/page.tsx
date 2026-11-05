@@ -5,13 +5,32 @@ import { EntregasSectionPublic } from '@/components/entregas/entregas-section-pu
 import { CatalogClientWrapper } from '@/components/catalogo/catalog-client-wrapper'
 
 export const dynamic = 'force-dynamic'
-const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
-export default async function CatalogoPage() {
-  const [productos, resenas, entregas] = await Promise.all([
+export default async function CatalogoPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tenant?: string }>
+}) {
+  const resolvedParams = searchParams ? await searchParams : {}
+
+  // Buscar primer tenant activo si no se pasa por query params (fallback seguro)
+  let activeTenantId = resolvedParams?.tenant
+
+  if (!activeTenantId) {
+    const defaultTenant = await prisma.tenants.findFirst({
+      select: { id: true, nombre: true }
+    })
+    activeTenantId = defaultTenant?.id || '11111111-1111-1111-1111-111111111111'
+  }
+
+  const [tenantInfo, productos, resenas, entregas] = await Promise.all([
+    prisma.tenants.findUnique({
+      where: { id: activeTenantId },
+      select: { nombre: true, logo_url: true }
+    }),
     prisma.productos.findMany({
       where: {
-        tenant_id: DEMO_TENANT_ID,
+        tenant_id: activeTenantId,
         estado: 'DISPONIBLE'
       },
       include: {
@@ -25,14 +44,16 @@ export default async function CatalogoPage() {
       ]
     }),
     prisma.resenas.findMany({
-      where: { tenant_id: DEMO_TENANT_ID, visible: true },
+      where: { tenant_id: activeTenantId, visible: true },
       orderBy: { created_at: 'desc' }
     }),
     prisma.entregas.findMany({
-      where: { tenant_id: DEMO_TENANT_ID, visible: true },
+      where: { tenant_id: activeTenantId, visible: true },
       orderBy: { created_at: 'desc' }
     })
   ])
+
+  const nombreConcesionario = tenantInfo?.nombre || 'DriveSync'
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-background">
@@ -41,9 +62,11 @@ export default async function CatalogoPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between py-3 px-4 sm:py-4 sm:px-6 md:px-8">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
-              <span className="text-primary-foreground font-bold text-lg tracking-tighter">D</span>
+              <span className="text-primary-foreground font-bold text-lg tracking-tighter">
+                {nombreConcesionario.charAt(0)}
+              </span>
             </div>
-            <h1 className="text-lg sm:text-xl font-semibold tracking-tight">DriveSync</h1>
+            <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{nombreConcesionario}</h1>
           </div>
           <nav className="hidden sm:flex items-center gap-1 text-sm text-muted-foreground">
             <a href="#catalogo" className="px-3 py-1.5 rounded-md hover:text-foreground hover:bg-muted/50 transition-colors">Catálogo</a>
@@ -60,13 +83,13 @@ export default async function CatalogoPage() {
               Descubre tu próximo vehículo
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg">
-              Inventario seleccionado de vehículos certificados, listos para conducir hoy mismo.
+              Inventario seleccionado de vehículos certificados, listos para conducir hoy mismo en {nombreConcesionario}.
             </p>
           </div>
 
           <AdvisorCard />
 
-          {/* Todo el catálogo con filtros y moneda es client-side */}
+          {/* Catálogo interactivo con filtros */}
           <CatalogClientWrapper productos={productos} />
         </section>
 
@@ -107,7 +130,7 @@ export default async function CatalogoPage() {
       <footer className="border-t border-border/40 bg-white/50 dark:bg-background/50 backdrop-blur-md py-6 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 text-center">
           <p className="text-[13px] text-muted-foreground font-medium">
-            Powered by <a href="https://vyntraorbit.com" target="_blank" rel="noopener noreferrer" className="font-bold text-primary hover:underline">Vyntra Orbit</a>
+            Powered by <a href="https://vyntraorbit.com" target="_blank" rel="noopener noreferrer" className="font-bold text-primary hover:underline">DriveSync SaaS</a>
           </p>
         </div>
       </footer>

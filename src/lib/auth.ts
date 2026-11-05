@@ -2,6 +2,9 @@ import { SignJWT, jwtVerify } from 'jose'
 
 // Para producción, esto debería venir de las variables de entorno.
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || 'super-secret-key-for-jwt-drive-sync-dev'
+if (!process.env.JWT_SECRET_KEY && process.env.NODE_ENV === 'production') {
+  console.warn('[SEGURIDAD] JWT_SECRET_KEY no está definida: se usa una clave pública por defecto. Define una en las variables de entorno.')
+}
 const key = new TextEncoder().encode(JWT_SECRET_KEY)
 
 export interface SessionPayload {

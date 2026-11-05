@@ -1,13 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import { EntregasClient } from '@/components/entregas/entregas-client'
+import { requireTenantSession } from '@/lib/tenant'
 
 export const dynamic = 'force-dynamic'
-const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
 
 export default async function EntregasPage() {
+  const { tenantId } = await requireTenantSession()
+
   const entregas = await prisma.entregas.findMany({
-    where: { tenant_id: DEMO_TENANT_ID },
-    orderBy: { created_at: 'desc' } // changed from fecha_entrega because schema.prisma doesn't have fecha_entrega, it has created_at
+    where: { tenant_id: tenantId },
+    orderBy: { created_at: 'desc' }
   })
 
   const mappedEntregas = entregas.map(e => {
@@ -26,5 +28,5 @@ export default async function EntregasPage() {
     }
   })
 
-  return <EntregasClient entregas={mappedEntregas} tenantId={DEMO_TENANT_ID} />
+  return <EntregasClient entregas={mappedEntregas} tenantId={tenantId} />
 }

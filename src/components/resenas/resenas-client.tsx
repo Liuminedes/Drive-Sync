@@ -91,7 +91,7 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
         texto: editing.texto, estrellas: editing.estrellas??5,
         foto_url: finalFotoUrl||null, visible: editing.visible??true,
       }
-      const res = await upsertResena(payload, tenantId)
+      const res = await upsertResena(payload)
       if (!res.success) throw new Error(res.error)
       toast.success(editing.id ? 'Reseña actualizada' : 'Reseña creada')
       setOpen(false)
@@ -110,8 +110,8 @@ export function ResenasClient({ resenas: initial, tenantId }: { resenas: Resena[
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-hidden">
-        <table className="w-full">
+      <div className="hidden md:block border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           <thead className="bg-muted/30">
             <tr className="h-11 border-b border-border/60">
               <th className="text-left text-xs font-medium text-muted-foreground pl-5">Cliente</th>

@@ -49,7 +49,7 @@ export function SedesClient({ initialSedes, tenantId }: { initialSedes: Sede[], 
         if (!res.success) throw new Error(res.error)
         toast.success('Sede actualizada')
       } else {
-        const res = await createSede(formData, tenantId)
+        const res = await createSede(formData)
         if (!res.success) throw new Error(res.error)
         toast.success('Sede creada')
       }

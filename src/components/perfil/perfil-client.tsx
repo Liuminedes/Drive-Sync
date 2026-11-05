@@ -75,7 +75,7 @@ export function PerfilClient({ perfil: initial, tenantId }: { perfil: Perfil | n
       }
 
       // Guardar datos via Server Action (usa admin client, sin RLS)
-      const res = await savePerfil(updatedForm, tenantId)
+      const res = await savePerfil(updatedForm)
       if (!res.success) throw new Error(res.error)
       toast.success('✓ Perfil guardado. Los cambios ya se ven en el catálogo.')
     } catch (err: any) {

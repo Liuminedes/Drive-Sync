@@ -91,7 +91,7 @@ export function EntregasClient({ entregas: initial, tenantId }: { entregas: Entr
         fecha_entrega: editing.fecha_entrega||null, foto_principal: todas[0]||null,
         fotos_extra: JSON.stringify(todas.slice(1)), nota: editing.nota||null, visible: editing.visible??true,
       }
-      const res = await upsertEntrega(payload, tenantId)
+      const res = await upsertEntrega(payload)
       if (!res.success) throw new Error(res.error)
       toast.success(editing.id?'Entrega actualizada':'Entrega guardada')
       setOpen(false)
@@ -115,8 +115,8 @@ export function EntregasClient({ entregas: initial, tenantId }: { entregas: Entr
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-hidden">
-        <table className="w-full">
+      <div className="hidden md:block border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           <thead className="bg-muted/30">
             <tr className="h-11 border-b border-border/60">
               <th className="text-left text-xs font-medium text-muted-foreground pl-5">Foto</th>

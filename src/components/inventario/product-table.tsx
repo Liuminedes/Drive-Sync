@@ -50,8 +50,8 @@ export function ProductTable({ productos, currentPage = 1, totalPages = 1 }: Pro
   return (
     <>
       {/* ─── DESKTOP TABLE (md+) — idéntico al original ─── */}
-      <div className="hidden md:block border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-hidden">
-        <table className="w-full">
+      <div className="hidden md:block border border-border/60 rounded-xl bg-white dark:bg-background shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           <thead className="bg-muted/30">
             <tr className="h-11 border-b border-border/60">
               <th className="w-[60px] pl-4 text-left text-xs font-medium text-muted-foreground">Foto</th>

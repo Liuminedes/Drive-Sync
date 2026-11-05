@@ -1,36 +1,42 @@
 import { prisma } from '@/lib/prisma'
 import { KpiCard } from '@/components/dashboard/kpi-card'
-import { Car, DollarSign, Users } from 'lucide-react'
+import { Car, DollarSign, Users, Sparkles } from 'lucide-react'
+import { requireTenantSession } from '@/lib/tenant'
 
-const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const [productos, leads] = await Promise.all([
-    prisma.productos.findMany({ where: { tenant_id: DEMO_TENANT_ID } }),
-    prisma.leads.findMany({ where: { tenant_id: DEMO_TENANT_ID } })
-  ])
+  const { tenantId, name } = await requireTenantSession()
 
-  const totalVehiculos = productos.length
-  const disponibles = productos.filter(p => p.estado === 'DISPONIBLE').length
-  const valorInventario = productos
-    .filter(p => p.estado === 'DISPONIBLE')
-    .reduce((acc, curr) => acc + Number(curr.precio_venta), 0)
-  
-  const leadsNuevos = leads.filter(l => l.estado === 'NUEVO').length
+  const [totalVehiculos, disponibles, valor, leadsPorEstado] = await Promise.all([
+    prisma.productos.count({ where: { tenant_id: tenantId } }),
+    prisma.productos.count({ where: { tenant_id: tenantId, estado: 'DISPONIBLE' } }),
+    prisma.productos.aggregate({ where: { tenant_id: tenantId, estado: 'DISPONIBLE' }, _sum: { precio_venta: true } }),
+    prisma.leads.groupBy({ by: ['estado'], where: { tenant_id: tenantId }, _count: { _all: true } }),
+  ])
+  const valorInventario = Number(valor._sum.precio_venta ?? 0)
+  const nLeads = (e: string) => leadsPorEstado.find((l) => l.estado === e)?._count._all ?? 0
+  const leadsNuevos = nLeads('NUEVO')
+  const leadsEnSeguimiento = nLeads('EN_SEGUIMIENTO')
+  const leadsConvertidos = nLeads('CONVERTIDO')
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Dashboard General</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Resumen de tu inventario y prospectos actuales.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Dashboard General</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Bienvenido, <span className="font-semibold text-foreground">{name}</span>. Resumen en tiempo real de tu concesionario.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
         <KpiCard 
-          title="Total Vehículos (Disponibles)"
+          title="Vehículos Disponibles"
           value={`${disponibles} / ${totalVehiculos}`}
           icon={<Car className="h-4 w-4 text-primary" />}
-          description="Unidades listas para la venta."
+          description="Unidades activas para la venta en catálogo."
         />
         <KpiCard 
           title="Valoración del Inventario"
@@ -39,15 +45,23 @@ export default async function DashboardPage() {
           description="Suma de precios de vehículos disponibles."
         />
         <KpiCard 
-          title="Leads Nuevos"
+          title="Leads Nuevos por Gestionar"
           value={leadsNuevos}
           icon={<Users className="h-4 w-4 text-primary" />}
-          description="Contactos sin gestionar desde el catálogo."
+          description={`${leadsEnSeguimiento} en seguimiento | ${leadsConvertidos} ventas cerradas`}
         />
       </div>
 
-      <div className="mt-4 rounded-xl border border-border/60 bg-white dark:bg-background p-6 sm:p-8 text-center text-muted-foreground">
-        <p className="text-sm">Gráficos y estadísticas detalladas próximamente.</p>
+      <div className="rounded-xl border border-border/60 bg-gradient-to-r from-blue-50/50 via-white to-slate-50 dark:from-background dark:to-muted/20 p-6 sm:p-8 flex items-start gap-4 shadow-sm">
+        <div className="p-2.5 rounded-lg bg-primary/10 text-primary shrink-0">
+          <Sparkles className="w-5 h-5" />
+        </div>
+        <div>
+          <h3 className="font-semibold tracking-tight text-base">WhatsApp Hub & Pipeline Comercial Activo</h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+            Tu concesionario está aislado y protegido. Recuerda utilizar mensajes predefinidos y respuestas inbound para mantener la máxima reputación de tus líneas comerciales.
+          </p>
+        </div>
       </div>
     </div>
   )

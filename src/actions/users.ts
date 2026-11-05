@@ -2,15 +2,23 @@
 
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { requireRole } from '@/lib/tenant'
 
 export async function createUser(data: {
-  tenant_id: string
+  tenant_id?: string
   nombre_completo: string
   email: string
   rol: string
   passwordPlano: string
 }) {
   try {
+    const session = await requireRole('ADMIN')
+    // El tenant_id siempre proviene de la sesión verificada del admin que crea el usuario
+    const tenantId = session.tenantId
+
+    if (!['ADMIN', 'ASESOR'].includes(data.rol)) return { success: false, error: 'Rol inválido' }
+    if (!data.passwordPlano || data.passwordPlano.length < 8) return { success: false, error: 'La contraseña debe tener al menos 8 caracteres' }
+
     // 1. Verificar si el email ya existe en la tabla usuarios
     const existingUser = await prisma.usuarios.findUnique({
       where: { email: data.email },
@@ -25,10 +33,10 @@ export async function createUser(data: {
     const salt = await bcrypt.genSalt(10)
     const password_hash = await bcrypt.hash(data.passwordPlano, salt)
 
-    // 3. Insertar el usuario
+    // 3. Insertar el usuario asociado al tenant
     await prisma.usuarios.create({
       data: {
-        tenant_id: data.tenant_id,
+        tenant_id: tenantId,
         nombre_completo: data.nombre_completo,
         email: data.email,
         rol: data.rol,

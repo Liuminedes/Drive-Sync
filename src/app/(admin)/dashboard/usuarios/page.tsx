@@ -1,11 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import { UsuariosClient } from '@/components/usuarios/usuarios-client'
+import { requireTenantSession } from '@/lib/tenant'
 
-const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111'
+export const dynamic = 'force-dynamic'
 
 export default async function UsuariosPage() {
+  const { tenantId } = await requireTenantSession()
+
   const usuarios = await prisma.usuarios.findMany({
-    where: { tenant_id: DEMO_TENANT_ID },
+    where: { tenant_id: tenantId },
     orderBy: { created_at: 'desc' }
   })
 
@@ -18,7 +21,7 @@ export default async function UsuariosPage() {
         </div>
       </div>
 
-      <UsuariosClient initialUsuarios={(usuarios as any) || []} tenantId={DEMO_TENANT_ID} />
+      <UsuariosClient initialUsuarios={(usuarios as any) || []} tenantId={tenantId} />
     </div>
   )
 }

@@ -1,8 +1,10 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { MobileHeader } from '@/components/dashboard/mobile-header'
+import { requireTenantSession } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { role, name } = await requireTenantSession()
   return (
     /*
       En desktop (lg+): sidebar ocupa espacio en el flow normal → flex row.
@@ -12,12 +14,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     */
     <div className="flex min-h-screen bg-[#fafafa] dark:bg-background selection:bg-primary/30">
       {/* Sidebar desktop — solo visible lg+, no existe en el DOM móvil gracias a hidden lg:flex */}
-      <Sidebar />
+      <Sidebar role={role} name={name} />
 
       {/* Columna principal — ocupa todo en móvil, el resto en desktop */}
       <div className="flex-1 flex flex-col min-w-0 w-full">
         {/* MobileHeader gestiona el botón hamburger + drawer fixed (no afecta layout) */}
-        <MobileHeader />
+        <MobileHeader role={role} name={name} />
 
         {/* Header desktop */}
         <header className="hidden lg:flex h-16 border-b border-border/40 bg-white/50 dark:bg-background/50 backdrop-blur-md items-center px-8 justify-between sticky top-0 z-10">

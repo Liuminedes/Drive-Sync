@@ -2,10 +2,19 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireRole } from '@/lib/tenant'
 
-export async function updateSede(id: string, data: Record<string, any>) {
+export async function createSede(data: Record<string, any>) {
   try {
-    await prisma.sedes.update({ where: { id }, data: data as any })
+    const { tenantId } = await requireRole('ADMIN')
+    await prisma.sedes.create({
+      data: {
+        nombre: data.nombre,
+        ciudad: data.ciudad,
+        direccion: data.direccion,
+        tenant_id: tenantId
+      }
+    })
     revalidatePath('/dashboard/sedes')
     return { success: true }
   } catch (error: any) {
@@ -13,9 +22,26 @@ export async function updateSede(id: string, data: Record<string, any>) {
   }
 }
 
-export async function createSede(data: Record<string, any>, tenantId: string) {
+export async function updateSede(id: string, data: Record<string, any>) {
   try {
-    await prisma.sedes.create({ data: { ...data, tenant_id: tenantId } as any })
+    const { tenantId } = await requireRole('ADMIN')
+
+    const sede = await prisma.sedes.findFirst({
+      where: { id, tenant_id: tenantId }
+    })
+
+    if (!sede) {
+      return { success: false, error: 'Sede no encontrada o no autorizada' }
+    }
+
+    await prisma.sedes.update({
+      where: { id },
+      data: {
+        nombre: data.nombre,
+        ciudad: data.ciudad,
+        direccion: data.direccion
+      }
+    })
     revalidatePath('/dashboard/sedes')
     return { success: true }
   } catch (error: any) {
@@ -25,6 +51,16 @@ export async function createSede(data: Record<string, any>, tenantId: string) {
 
 export async function deleteSede(id: string) {
   try {
+    const { tenantId } = await requireRole('ADMIN')
+
+    const sede = await prisma.sedes.findFirst({
+      where: { id, tenant_id: tenantId }
+    })
+
+    if (!sede) {
+      return { success: false, error: 'Sede no encontrada o no autorizada' }
+    }
+
     await prisma.sedes.delete({ where: { id } })
     revalidatePath('/dashboard/sedes')
     return { success: true }
