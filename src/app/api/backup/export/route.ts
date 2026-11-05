@@ -29,6 +29,7 @@ export async function GET(req: Request) {
       const images: { name: string; bytes: Uint8Array }[] = []
       const missing: string[] = []
       let i = 0
+      let n = 0 // el nombre se asigna antes del await: con 5 descargas en paralelo, images.length se repetía
       // 5 descargas en paralelo
       await Promise.all(Array.from({ length: 5 }, async () => {
         while (i < urls.length) {
@@ -37,7 +38,7 @@ export async function GET(req: Request) {
             const res = await fetch(url)
             if (!res.ok) throw new Error(String(res.status))
             const ext = (url.split('?')[0].match(/\.(\w{1,5})$/)?.[1] ?? 'jpg').toLowerCase()
-            const name = `images/${images.length}.${ext}`
+            const name = `images/${n++}.${ext}`
             images.push({ name, bytes: new Uint8Array(await res.arrayBuffer()) })
             text = text.split(url).join(name)
           } catch {
