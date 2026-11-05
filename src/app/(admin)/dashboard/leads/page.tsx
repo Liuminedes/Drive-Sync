@@ -4,6 +4,15 @@ import { requireTenantSession } from '@/lib/tenant'
 
 export const dynamic = 'force-dynamic'
 
+// La BD guarda nombre/email/telefono/estado; el componente usa los nombres del esquema anterior.
+const toClientLead = (l: any) => ({
+  ...l,
+  nombre_cliente: l.nombre ?? '',
+  email_cliente: l.email ?? null,
+  telefono_cliente: l.telefono ?? '',
+  estado_lead: l.estado ?? 'NUEVO',
+})
+
 export default async function LeadsPage() {
   const { tenantId } = await requireTenantSession()
   let leads: any[] = []
@@ -49,7 +58,7 @@ export default async function LeadsPage() {
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight">CRM Prospectos (Leads)</h1>
         <p className="text-sm text-muted-foreground mt-0.5 hidden sm:block">Administra y contacta a los interesados en tus vehículos.</p>
       </div>
-      <LeadsClient initialLeads={leads} asesores={asesores || []} />
+      <LeadsClient initialLeads={leads.map(toClientLead)} asesores={asesores || []} />
     </div>
   )
 }
