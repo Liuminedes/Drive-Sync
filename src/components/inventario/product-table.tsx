@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Eye, Edit2, Trash2 } from 'lucide-react'
@@ -19,6 +19,13 @@ export function ProductTable({ productos, currentPage = 1, totalPages = 1 }: Pro
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // Conserva búsqueda y estado al cambiar de página
+  const goToPage = (p: number) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', String(p))
+    router.push(`/dashboard/inventario?${params.toString()}`)
+  }
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer.')) return
@@ -176,7 +183,7 @@ export function ProductTable({ productos, currentPage = 1, totalPages = 1 }: Pro
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push(`/dashboard/inventario?page=${currentPage - 1}`)}
+                onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage <= 1}
                 className="h-8 px-3"
               >
@@ -185,7 +192,7 @@ export function ProductTable({ productos, currentPage = 1, totalPages = 1 }: Pro
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push(`/dashboard/inventario?page=${currentPage + 1}`)}
+                onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage >= totalPages}
                 className="h-8 px-3"
               >

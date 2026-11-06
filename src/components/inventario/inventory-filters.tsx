@@ -20,6 +20,8 @@ export function InventoryFilters() {
 
   // Debounce para la búsqueda de texto
   useEffect(() => {
+    // Solo reaccionar a cambios del filtro; si la URL ya coincide (p. ej. cambio de página) no tocar nada
+    if (search === defaultSearch && estado === defaultEstado) return
     const timer = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString())
       if (search) params.set('q', search)
@@ -37,7 +39,7 @@ export function InventoryFilters() {
     }, 400) // 400ms debounce
 
     return () => clearTimeout(timer)
-  }, [search, estado, pathname, router, searchParams])
+  }, [search, estado, defaultSearch, defaultEstado, pathname, router, searchParams])
 
   return (
     <div className="flex flex-col sm:flex-row items-center gap-3 bg-white dark:bg-background border border-border/60 p-3 rounded-xl shadow-sm">
